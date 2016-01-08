@@ -47,7 +47,7 @@ KeyName User::getInput(FILE *kb_device)
 		flag = 1;
 		close(fd[0]);
 
-		bool upPressed = false, downPressed = false, leftPressed = false, rightPressed = false, dropPressed = false, isHold = false;
+		bool upPressed = false, downPressed = false, leftPressed = false, rightPressed = false, ctrlPressed = false, dropPressed = false, isHold = false;
 		KeyName key;
 
 		struct input_event ev;
@@ -75,41 +75,41 @@ KeyName User::getInput(FILE *kb_device)
 			switch(key)
 			{
 			case K_DOWN_P:
-				if(downPressed == false)
+				if(downPressed == true)
+				{
+					downPressed = false;
+					key = K_DOWN_R;
+					write(fd[1], &key, sizeof(KeyName));
+				}
+				else
 				{
 					downPressed = true;
 					write(fd[1], &key, sizeof(KeyName));
 				}
 				break;
-			case K_DOWN_R:
-				downPressed = false;
-				write(fd[1], &key, sizeof(KeyName));
-				break;
 			case K_LEFT_P:
-				if(leftPressed == false)
+				if(leftPressed == true)
+				{
+					leftPressed = false;
+					key = K_LEFT_R;
+					write(fd[1], &key, sizeof(KeyName));
+				}
+				else
 				{
 					leftPressed = true;
 					write(fd[1], &key, sizeof(KeyName));
 				}
 				break;
-			case K_LEFT_R:
-				if(leftPressed == true)
-				{
-					leftPressed = false;
-					write(fd[1], &key, sizeof(KeyName));
-				}
-				break;
 			case K_RIGHT_P:
-				if(rightPressed == false)
-				{
-					rightPressed = true;
-					write(fd[1], &key, sizeof(KeyName));
-				}
-				break;
-			case K_RIGHT_R:
 				if(rightPressed == true)
 				{
 					rightPressed = false;
+					key = K_RIGHT_R;
+					write(fd[1], &key, sizeof(KeyName));
+				}
+				else
+				{
+					rightPressed = true;
 					write(fd[1], &key, sizeof(KeyName));
 				}
 				break;
@@ -130,6 +130,11 @@ KeyName User::getInput(FILE *kb_device)
 			case K_LSHIFT_P:
 			case K_RSHIFT_P:
 				if((isHold = !isHold) == true)
+					write(fd[1], &key, sizeof(KeyName));
+				break;
+			case K_LCTRL_P:
+			case K_RCTRL_P:
+				if((ctrlPressed = !ctrlPressed) == true)
 					write(fd[1], &key, sizeof(KeyName));
 				break;
 			default:
