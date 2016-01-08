@@ -44,8 +44,6 @@ Block::Block(void)
 Block::Block(block_t type)
 	: _type(type), _rotation(0)
 {
-	ERROR("Block::Block");
-
 	switch(type)
 	{
 	case BLK_I:
