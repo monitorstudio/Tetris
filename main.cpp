@@ -16,7 +16,6 @@ int main(void)
 	Board board = Board(20, 10);
 
 	struct termios t_old, t_new;
-	struct input_event ev;
 
 	tcgetattr(STDIN_FILENO, &t_old);
 	memcpy(&t_new, &t_old, sizeof(struct termios));
