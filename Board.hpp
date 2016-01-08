@@ -3,8 +3,11 @@
 
 #include <cstddef>
 #include "Block.hpp"
-#include "BlockGenerator.hpp"
+#include "Tetris.hpp"
 #include "Array.hpp"
+
+#define CLOCKWISE true
+#define COUNTERCLOCKWISE false
 
 typedef enum
 {
@@ -35,12 +38,13 @@ public:
 	~Board(void);
 	void show(void);
 	void clear(void);
-	void rotateBlock(void);
+	void autoPlay(void);
+	void rotateBlock(bool);
 	void dropBlock(void);
 	void holdBlock(void);
 	void moveBlockDown(void);
-	void moveBlockLeft(void);
-	void moveBlockRight(void);
+	int moveBlockLeft(void);
+	int moveBlockRight(void);
 private:
 	void _genBlock(void);
 	void _updateBuffer(void);
@@ -50,7 +54,7 @@ private:
 	void _eraseBlock(void);
 	bool _pileOverHeight(void);
 	Block _block;
-	block_t _hold;
+	BlockHolder _blkHolder;
 	BlockGenerator _blkGen;
 	Array<Array<NodeState> > _table;
 	Array<Array<int> > _buffer;
