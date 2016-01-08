@@ -34,39 +34,39 @@ int main(void)
 	{
 		switch(User::getInput(kb_device))
 		{
-		case K_SPACE_P:
+		case KEY_SPACE:
 			board.dropBlock();
 			break;
-		case K_LSHIFT_P:
-		case K_RSHIFT_P:
+		case KEY_LEFTSHIFT:
+		case KEY_RIGHTSHIFT:
 			board.holdBlock();
 			break;
-		case K_UP_P:
+		case KEY_UP:
 			board.rotateBlock(CLOCKWISE);
 			break;
-		case K_LCTRL_P:
-		case K_RCTRL_P:
+		case KEY_LEFTCTRL:
+		case KEY_RIGHTCTRL:
 			board.rotateBlock(COUNTERCLOCKWISE);
 			break;
-		case K_DOWN_P:
+		case KEY_DOWN_P:
 			buttom = true;
 			break;
-		case K_DOWN_R:
+		case KEY_DOWN_R:
 			buttom = false;
 			break;
-		case K_LEFT_P:
+		case KEY_LEFT_P:
 			left = true;
 			break;
-		case K_LEFT_R:
+		case KEY_LEFT_R:
 			left = false;
 			break;
-		case K_RIGHT_P:
+		case KEY_RIGHT_P:
 			right = true;
 			break;
-		case K_RIGHT_R:
+		case KEY_RIGHT_R:
 			right = false;
 			break;
-		case K_Q_P:
+		case KEY_Q:
 			std::fflush(stdin);
 			tcsetattr(STDIN_FILENO, TCSANOW, &t_old);
 			return 0;
@@ -90,7 +90,7 @@ int main(void)
 		if(buttom && !left && !right)
 			usleep(30000);
 		else if(left || right)
-			usleep(80000);
+			usleep(60000);
 		else
 			usleep(1);
 
