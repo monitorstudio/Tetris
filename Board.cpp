@@ -9,32 +9,6 @@
 #include "Board.hpp"
 #include "Logger.hpp"
 
-#define FGCOLOR
-
-#ifdef BGCOLOR
-#define	WHITE	"\033[1;37;47m"
-#define	CYAN	"\033[1;36;46m"
-#define	YELLOW	"\033[1;33;43m"
-#define	GREEN	"\033[1;32;42m"
-#define	RED	"\033[1;31;41m"
-#define	ORANGE	"\033[0;33;43m"
-#define	BLUE	"\033[1;34;44m"
-#define	PURPLE	"\033[1;35;45m"
-#define	GRAY	"\033[1;30;40m"
-#endif
-
-#ifdef FGCOLOR
-#define	WHITE	"\033[1;37;47m"
-#define	CYAN	"\033[1;36;46m"
-#define	YELLOW	"\033[1;33;43m"
-#define	GREEN	"\033[0;32;42m"
-#define	RED	"\033[1;31;41m"
-#define	ORANGE	"\033[0;33;43m"
-#define	BLUE	"\033[1;34;44m"
-#define	PURPLE	"\033[1;35;45m"
-#define	GRAY	"\033[1;30;40m"
-#endif
-
 namespace {
 	NodeState swState(NodeState state)
 	{
@@ -132,7 +106,6 @@ namespace {
 			for(i = pair[0] + block.y() + 1; i < table.size(); i++)
 			{
 				NodeState state = table[i][block.x() + pair[1]];
-				ERROR("NodeState state = table[" << i << "][" << block.x() << " + " << pair[1] << "]");
 
 				if(state != STATE_OFF && state != SWITCH_OFF && state != STATE_SHADOW && state != SWITCH_SHADOW)
 				{
@@ -152,6 +125,8 @@ namespace {
 
 	size_t clearLines(Board &board, Array<Array<NodeState> > &table)
 	{
+		INFO("::clearLines");
+
 		Array<int> toClear;
 
 		table.forEach([&] (Array<NodeState> &array, size_t column) mutable -> void
@@ -181,7 +156,7 @@ namespace {
 		if(toClear.size() != 0)
 		{
 			board.show();
-			usleep(410000);
+			usleep(100000);
 
 			toClear.forEach([&] (int &column) mutable -> void
 			{
@@ -219,13 +194,12 @@ Board::Board(size_t column, size_t row)
 
 	std::cout << "\e[?25l\e[1;1H\e[2J";
 
-	srand(static_cast<unsigned>(time(NULL)));
-
 	for(size_t y = 0; y < column + 2; y++)
 	for(size_t x = 0; x < row; x++)
 		_table[y][x] = SWITCH_OFF;
 
-	_hold = BLK_E;
+	_blkHolder = BlockHolder();
+	_blkGen = BlockGenerator();
 	_genBlock();
 }
 
@@ -233,7 +207,7 @@ Board::~Board(void)
 {
 	INFO("Board::~Board");
 
-	std::cout << "\e[?25h\033[26;1H\033[0m";
+	std::cout << "\033[0m\e[2J\e[?25h\033[1;1H";
 }
 
 void Board::show(void)
@@ -244,7 +218,7 @@ void Board::show(void)
 
 	_buffer.forEach([&] (Array<int> &array) mutable -> void
 	{
-		std::cout << "\033[" << array[0] - 2 << ";" << array[1] * 2 + 1 << "H" << ::stateColor(_table[array[0]][array[1]]) << "██";
+		std::cout << "\033[" << array[0] - 2 << ";" << (array[1] + 6) * 2 << "H" << ::stateColor(_table[array[0]][array[1]]) << "██";
 	});
 
 	_buffer.clear();
@@ -268,7 +242,7 @@ void Board::clear(void)
 	show();
 }
 
-void Board::rotateBlock(void)
+void Board::rotateBlock(bool dir)
 {
 	INFO("Board::rotateBlock");
 
@@ -313,16 +287,32 @@ void Board::rotateBlock(void)
 
 		if(collision() == true)
 		{
-			_block.rotate();
-			_block.rotate();
-			_block.rotate();
+			if(dir == CLOCKWISE)
+			{
+				_block.rotate();
+				_block.rotate();
+				_block.rotate();
+			}
+			else
+			{
+				_block.rotate();
+			}
 		}
 	};
 
 	_eraseBlock();
 	_eraseShadow();
 
-	_block.rotate();
+	if(dir == CLOCKWISE)
+	{
+		_block.rotate();
+	}
+	else
+	{
+		_block.rotate();
+		_block.rotate();
+		_block.rotate();
+	}
 
 	if(collision() == true)
 		adjust();
@@ -346,13 +336,15 @@ void Board::dropBlock(void)
 	{
 		clear();
 		_blkGen.reset();
-		_hold = BLK_E;
+		_blkHolder.reset();
 	}
 	else
 	{
 		_printBlock();
 		::clearLines(*this, _table);
 	}
+
+	show();
 
 	_genBlock();
 
@@ -364,18 +356,21 @@ void Board::dropBlock(void)
 
 void Board::holdBlock(void)
 {
+	INFO("Board::holdBlock");
+
 	_eraseBlock();
 	_eraseShadow();
 
-	if(_hold == BLK_E)
+	block_t block = _block.type();
+
+	_blkHolder.hold(block);
+
+	if(block == BLK_E)
 	{
-		_hold = _block.type();
 		_genBlock();
 	}
 	else
 	{
-		block_t block = _hold;
-		_hold = _block.type();
 		_block = Block(block);
 		_block.move(0, _table[0].size() / 2);
 	}
@@ -436,7 +431,7 @@ void Board::moveBlockDown(void)
 	}
 }
 
-void Board::moveBlockLeft(void)
+int Board::moveBlockLeft(void)
 {
 	INFO("Board::moveBlockDown");
 
@@ -452,10 +447,10 @@ void Board::moveBlockLeft(void)
 			state = _table[y + _left[i][0]][x + _left[i][1] - 1];
 
 			if (state != STATE_OFF && state != SWITCH_OFF && state != STATE_SHADOW && state != SWITCH_SHADOW)
-				return;
+				return -1;
 		}
 		else
-			return;
+			return -1;
 	}
 
 	_eraseBlock();
@@ -467,9 +462,11 @@ void Board::moveBlockLeft(void)
 	_printBlock();
 
 	show();
+
+	return 0;
 }
 
-void Board::moveBlockRight(void)
+int Board::moveBlockRight(void)
 {
 	INFO("Board::moveBlockDown");
 
@@ -485,10 +482,10 @@ void Board::moveBlockRight(void)
 			state = _table[y + _right[i][0]][x + _right[i][1] + 1];
 
 			if (state != STATE_OFF && state != SWITCH_OFF && state != STATE_SHADOW && state != SWITCH_SHADOW)
-				return;
+				return -1;
 		}
 		else
-			return;
+			return -1;
 	}
 
 	_eraseBlock();
@@ -500,6 +497,8 @@ void Board::moveBlockRight(void)
 	_printBlock();
 
 	show();
+
+	return 0;
 }
 
 void Board::_genBlock(void)
