@@ -3,8 +3,11 @@
 #include <ctime>
 #include <unistd.h>
 #include <termios.h>
+#include <fcntl.h>
 #include <linux/input.h>
 #include <sys/timeb.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "Board.hpp"
 #include "User.hpp"
 
@@ -23,7 +26,6 @@ int main(void)
 	FILE *kb_device = fopen("/dev/input/by-id/usb-0566_USB_Keyboard-event-if00", "r");
 
 	bool left = false, right = false, buttom = false;
-	char dummy[255];
 
 	struct timeb start, end;
 	ftime(&start);
@@ -41,10 +43,11 @@ int main(void)
 			board.holdBlock();
 			break;
 		case K_UP_P:
-			board.rotateBlock();
+			board.rotateBlock(CLOCKWISE);
 			break;
 		case K_LCTRL_P:
 		case K_RCTRL_P:
+			board.rotateBlock(COUNTERCLOCKWISE);
 			break;
 		case K_DOWN_P:
 			buttom = true;
@@ -65,8 +68,6 @@ int main(void)
 			right = false;
 			break;
 		case K_Q_P:
-			std::fflush(stdin);
-			std::scanf("%s", dummy);
 			std::fflush(stdin);
 			tcsetattr(STDIN_FILENO, TCSANOW, &t_old);
 			return 0;
@@ -90,9 +91,9 @@ int main(void)
 		if(buttom && !left && !right)
 			usleep(30000);
 		else if(left || right)
-			usleep(75000);
+			usleep(80000);
 		else
-			usleep(4);
+			usleep(1);
 
 		if(!buttom)
 		{
