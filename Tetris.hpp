@@ -1,5 +1,5 @@
-#ifndef TETRIS_H
-#define TETRIS_H
+#ifndef TETRIS_HPP
+#define TETRIS_HPP
 
 #include <deque>
 
@@ -30,12 +30,15 @@ class BlockGenerator
 {
 public:
 	BlockGenerator(void);
+	BlockGenerator(int, int);
 	block_t getBlock(void);
 	void reset(void);
 private:
+	int _y, _x;
 	int _pos;
 	block_t _nextBlock(void);
 	std::deque<block_t> _buffer;
 };
 
-#endif /* TETRIS_H */
+#endif	// TETRIS_HPP_
+
