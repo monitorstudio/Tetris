@@ -132,8 +132,13 @@ void BlockHolder::reset(void)
 
 BlockGenerator::BlockGenerator(void)
 {
+}
+
+BlockGenerator::BlockGenerator(int y, int x)
+{
 	srand(static_cast<unsigned>(time(NULL)));
 
+	y = _y, _x = x;
 	_pos = 7;
 }
 
@@ -145,9 +150,9 @@ block_t BlockGenerator::getBlock(void)
 	block_t block = _buffer.front();
 	_buffer.pop_front();
 
-	box(LARGE, _buffer[0], 2, 34);
+	box(LARGE, _buffer[0], _y + 2, _x * 2 + 14);
 	for(int i = 1; i < 4; i++)
-		box(SMALL, _buffer[i], 3 + i * 4, 34);
+		box(SMALL, _buffer[i], _y + 3 + i * 4, _x * 2 + 14);
 
 	return block;
 }
