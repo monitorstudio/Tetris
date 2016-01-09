@@ -1,5 +1,5 @@
-#ifndef TETRIS_HPP
-#define TETRIS_HPP
+#ifndef TETRIS_HPP_
+#define TETRIS_HPP_
 
 #include <deque>
 
