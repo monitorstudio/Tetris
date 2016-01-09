@@ -199,7 +199,7 @@ Board::Board(size_t column, size_t row)
 		_table[y][x] = SWITCH_OFF;
 
 	_blkHolder = BlockHolder();
-	_blkGen = BlockGenerator();
+	_blkGen = BlockGenerator(0, _table[0].size());
 	_genBlock();
 }
 
