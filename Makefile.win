@@ -6,8 +6,8 @@ release: debug
 	copy Tetris.dbg.exe Tetris.exe
 	$(STRIP) Tetris.exe
 
-debug: main Board Tetris Block Logger
-	$(CXX) $(CXXFLAGS) -o Tetris.dbg.exe main_WINDOWS.o Board.o Tetris.o Block.o Logger.o
+debug: main Board Tetris Block
+	$(CXX) $(CXXFLAGS) -o Tetris.dbg.exe main_WINDOWS.o Board.o Tetris.o Block.o
 
 main: Board.hpp Array.hpp Block.hpp Logger.hpp main_WINDOWS.cpp
 	$(CXX) $(CXXFLAGS) -c main_WINDOWS.cpp
@@ -20,9 +20,6 @@ Tetris: Tetris.hpp Tetris.cpp
 
 Block: Block.hpp Array.hpp Logger.hpp Block.cpp
 	$(CXX) $(CXXFLAGS) -c Block.cpp
-
-Logger: Logger.hpp Logger.cpp
-	$(CXX) $(CXXFLAGS) -c Logger.cpp
 
 .PHONY clean:
 	del Tetris.dbg.exe Tetris.exe *.o
