@@ -177,17 +177,17 @@ void Block::rotate(void)
 
 void Block::move(int my, int mx)
 {
-	INFO("Block::move");
+	I("Block::move");
 
 	_y += my, _x += mx;
 
-	INFO("_block._y = " << _y);
-	INFO("_block._x = " << _x);
+	I("_block._y = " << _y);
+	I("_block._x = " << _x);
 }
 
 void Block::_findBrim(void)
 {
-	INFO("Block::_findBrim");
+	I("Block::_findBrim");
 
 	_top.clear();
 	_buttom.clear();
@@ -268,3 +268,4 @@ void Block::_moveCenter(void)	// Correct Center On Each Rotation Status
 		break;
 	}
 }
+
