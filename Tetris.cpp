@@ -1,5 +1,8 @@
 #include <iostream>
 
+#include <time.h>
+#include <windows.h>
+
 #include "Tetris.hpp"
 
 #define LARGE true
@@ -7,7 +10,24 @@
 
 namespace {
 
-	const char *blkColor(block_t type)
+	void gotoYX(int y, int x)
+	{
+		COORD scrn;
+		HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+		scrn.Y = y;
+		scrn.X = x;
+		SetConsoleCursorPosition(hOutput, scrn);
+	}
+	
+	void setConsoleColor(int color)
+	{
+		HANDLE  hConsole;
+		hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		
+		SetConsoleTextAttribute(hConsole, color);
+	}
+
+	int blkColor(block_t type)
 	{
 		switch(type)
 		{
@@ -28,15 +48,21 @@ namespace {
 		if(size == LARGE)
 		{
 			for(int i = y; i < y + 4; i++)
-				std::cout << "\033[" << i << ";" << x << "H\033[0;37m████████";
+			{
+				::gotoYX(i, x);
+				::setConsoleColor(WHITE);
+				std::cout << "        ";
+			}
 		}
 		else if(size == SMALL)
 		{
 			for(int i = y; i < y + 4; i++)
-				std::cout << "\033[" << i << ";" << x << "H\033[0;37m██████";
+			{
+				::gotoYX(i, x);
+				::setConsoleColor(WHITE);
+				std::cout << "      ";
+			}
 		}
-
-		std::cout << "\033[0m";
 	}
 
 	void box(bool size, block_t type, int y, int x)
@@ -52,19 +78,27 @@ namespace {
 				switch(type)
 				{
 				case BLK_I:
-					std::cout << "\033[" << pair[0] + 1 + y << ";" << pair[1]     + 3 + x << "H" << ::blkColor(type) << "███";
+					::gotoYX(pair[0] + 1 + y, pair[1] + 3 + x);
+					::setConsoleColor(::blkColor(type));
+					std::cout << "   ";
 					break;
 				case BLK_O:
-					std::cout << "\033[" << pair[0] + 1 + y << ";" << pair[1] * 2 + 2 + x << "H" << ::blkColor(type) << "██";
+					::gotoYX(pair[0] + 1 + y, pair[1] * 2 + 2 + x);
+					::setConsoleColor(::blkColor(type));
+					std::cout << "  ";
 					break;
 				case BLK_Z:
-					std::cout << "\033[" << pair[0] + 1 + y << ";" << pair[1] * 2 + 3 + x << "H" << ::blkColor(type) << "██";
+					::gotoYX(pair[0] + 1 + y, pair[1] * 2 + 3 + x);
+					::setConsoleColor(::blkColor(type));
+					std::cout << "  ";
 					break;
 				case BLK_S:
 				case BLK_L:
 				case BLK_J:
 				case BLK_T:
-					std::cout << "\033[" << pair[0] + 2 + y << ";" << pair[1] * 2 + 3 + x << "H" << ::blkColor(type) << "██";
+					::gotoYX(pair[0] + 2 + y, pair[1] * 2 + 3 + x);
+					::setConsoleColor(::blkColor(type));
+					std::cout << "  ";
 					break;
 				case BLK_E:
 					break;
@@ -78,27 +112,33 @@ namespace {
 				switch(type)
 				{
 				case BLK_I:
-					std::cout << "\033[" << pair[0] + 1 + y << ";" << pair[1] + 3 + x << "H" << ::blkColor(type) << "██";
+					::gotoYX(pair[0] + 1 + y, pair[1] + 3 + x);
+					::setConsoleColor(::blkColor(type));
+					std::cout << "  ";
 					break;
 				case BLK_O:
-					std::cout << "\033[" << pair[0] + 1 + y << ";" << pair[1] + 1 + x << "H" << ::blkColor(type) << "██";
+					::gotoYX(pair[0] + 1 + y, pair[1] + 1 + x);
+					::setConsoleColor(::blkColor(type));
+					std::cout << "  ";
 					break;
 				case BLK_Z:
-					std::cout << "\033[" << pair[0] + 1 + y << ";" << pair[1] + 2 + x << "H" << ::blkColor(type) << "██";
+					::gotoYX(pair[0] + 1 + y, pair[1] + 2 + x);
+					::setConsoleColor(::blkColor(type));
+					std::cout << "  ";
 					break;
 				case BLK_S:
 				case BLK_L:
 				case BLK_J:
 				case BLK_T:
-					std::cout << "\033[" << pair[0] + 2 + y << ";" << pair[1] + 2 + x << "H" << ::blkColor(type) << "██";
+					::gotoYX(pair[0] + 2 + y, pair[1] + 2 + x);
+					::setConsoleColor(::blkColor(type));
+					std::cout << "  ";
 					break;
 				case BLK_E:
 					break;
 				}
 			});
 		}
-
-		std::cout << "\033[0m";
 	}
 
 }
@@ -138,7 +178,7 @@ BlockGenerator::BlockGenerator(int y, int x)
 {
 	srand(static_cast<unsigned>(time(NULL)));
 
-	y = _y, _x = x;
+	_y = y, _x = x;
 	_pos = 7;
 }
 
