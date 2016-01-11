@@ -1,6 +1,6 @@
 #include <cstddef>
+
 #include "Block.hpp"
-#include "Logger.hpp"
 
 namespace {
 
@@ -177,18 +177,11 @@ void Block::rotate(void)
 
 void Block::move(int my, int mx)
 {
-	I("Block::move");
-
 	_y += my, _x += mx;
-
-	I("_block._y = " << _y);
-	I("_block._x = " << _x);
 }
 
 void Block::_findBrim(void)
 {
-	I("Block::_findBrim");
-
 	_top.clear();
 	_buttom.clear();
 	_left.clear();
