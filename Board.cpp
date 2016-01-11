@@ -1,5 +1,4 @@
 #include <iostream>
-
 #include <deque>
 
 #include <cstddef>
@@ -8,7 +7,6 @@
 #include <unistd.h>
 
 #include "Board.hpp"
-#include "Logger.hpp"
 
 namespace {
 	NodeState swState(NodeState state)
@@ -126,8 +124,6 @@ namespace {
 
 	size_t clearLines(Board &board, Array<Array<NodeState> > &table)
 	{
-		I("::clearLines");
-
 		Array<int> toClear;
 
 		table.forEach([&] (Array<NodeState> &array, size_t column) mutable -> void
@@ -208,8 +204,6 @@ namespace {
 
 Board::Board(size_t column, size_t row)
 {
-	I("Board::Board");
-
 	::gotoYX(1, 1);
 
 	for(size_t y = 0; y < column + 2; y++)
@@ -223,15 +217,11 @@ Board::Board(size_t column, size_t row)
 
 Board::~Board(void)
 {
-	I("Board::~Board");
-
 	::gotoYX(1, 1);
 }
 
 void Board::show(void)
 {
-	I("Board::show");
-
 	_updateBuffer();
 
 	_buffer.forEach([&] (Array<int> &array) mutable -> void
@@ -248,8 +238,6 @@ void Board::show(void)
 
 void Board::clear(void)
 {
-	I("Board::clear");
-
 	_table.forEach([&] (Array<NodeState> &array) mutable -> void
 	{
 		array.forEach([&] (NodeState &state) mutable -> void
@@ -264,8 +252,6 @@ void Board::clear(void)
 
 void Board::rotateBlock(bool dir)
 {
-	I("Board::rotateBlock");
-
 	auto collision = [&] (void) mutable -> bool
 	{
 		for(size_t i = 0; i < 4; i++)
@@ -345,8 +331,6 @@ void Board::rotateBlock(bool dir)
 
 void Board::dropBlock(void)
 {
-	I("Board::dropBlock");
-
 	_eraseBlock();
 	_eraseShadow();
 
@@ -376,8 +360,6 @@ void Board::dropBlock(void)
 
 void Board::holdBlock(void)
 {
-	I("Board::holdBlock");
-
 	_eraseBlock();
 	_eraseShadow();
 
@@ -403,8 +385,6 @@ void Board::holdBlock(void)
 
 void Board::moveBlockDown(void)
 {
-	I("Board::moveBlockDown");
-
 	static int drop = 0;
 
 	auto atButtom = [&] (void) -> bool
@@ -453,8 +433,6 @@ void Board::moveBlockDown(void)
 
 int Board::moveBlockLeft(void)
 {
-	I("Board::moveBlockDown");
-
 	int x = _block.x(), y = _block.y();
 	Array<Array<int> > &_left = _block.left();
 	NodeState state;
@@ -487,8 +465,6 @@ int Board::moveBlockLeft(void)
 
 int Board::moveBlockRight(void)
 {
-	I("Board::moveBlockDown");
-
 	int x = _block.x(), y = _block.y();
 	Array<Array<int> > &_right = _block.right();
 	NodeState state;
@@ -521,16 +497,12 @@ int Board::moveBlockRight(void)
 
 void Board::_genBlock(void)
 {
-	I("Board::_genBlock");
-
 	_block = Block(_blkGen.getBlock());
 	_block.move(0, _table[0].size() / 2);
 }
 
 void Board::_updateBuffer(void)
 {
-	I("Board::_updateBuffer");
-
 	Array<int> test;
 
 	_table.forEach([&] (Array<NodeState> &array, size_t y) mutable -> void
@@ -567,8 +539,6 @@ void Board::_updateBuffer(void)
 
 void Board::_printShadow(void)
 {
-	I("Board::_printShadow");
-
 	size_t height = ::heightOf(_block, _table);
 	int y = _block.y(), x = _block.x();
 
@@ -580,8 +550,6 @@ void Board::_printShadow(void)
 
 void Board::_eraseShadow(void)
 {
-	I("Board::_ersaeShadow");
-
 	size_t height = ::heightOf(_block, _table);
 	int y = _block.y(), x = _block.x();
 
@@ -593,8 +561,6 @@ void Board::_eraseShadow(void)
 
 void Board::_printBlock(void)
 {
-	I("Board::_printBlock");
-
 	int x = _block.x(), y = _block.y();
 	NodeState state = ::blockState(_block.type());
 
@@ -606,8 +572,6 @@ void Board::_printBlock(void)
 
 void Board::_eraseBlock(void)
 {
-	I("Board::_eraseBlock");
-
 	int x = _block.x(), y = _block.y();
 
 	_block.blocks().forEach([&](Array<int> &pair) mutable -> void
