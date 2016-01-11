@@ -1,11 +1,12 @@
 #include <iostream>
 
-#include <cstddef>
-#include <ctime>
-
 #include <deque>
 
-#include "unistd.h"
+#include <cstddef>
+#include <ctime>
+#include <windows.h>
+#include <unistd.h>
+
 #include "Board.hpp"
 #include "Logger.hpp"
 
@@ -77,7 +78,7 @@ namespace {
 		}
 	}
 
-	const char *stateColor(NodeState state)
+	int stateColor(NodeState state)
 	{
 		switch(state)
 		{
@@ -125,7 +126,7 @@ namespace {
 
 	size_t clearLines(Board &board, Array<Array<NodeState> > &table)
 	{
-		INFO("::clearLines");
+		I("::clearLines");
 
 		Array<int> toClear;
 
@@ -186,13 +187,30 @@ namespace {
 		return toClear.size();
 	}
 
+	void gotoYX(int y, int x)
+	{
+		COORD scrn;
+		HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+		scrn.Y = y;
+		scrn.X = x;
+		SetConsoleCursorPosition(hOutput, scrn);
+	}
+	
+	void setConsoleColor(int color)
+	{
+		HANDLE  hConsole;
+		hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		
+		SetConsoleTextAttribute(hConsole, color);
+	}
+
 }
 
 Board::Board(size_t column, size_t row)
 {
-	INFO("Board::Board");
+	I("Board::Board");
 
-	std::cout << "\e[?25l\e[1;1H\e[2J";
+	::gotoYX(1, 1);
 
 	for(size_t y = 0; y < column + 2; y++)
 	for(size_t x = 0; x < row; x++)
@@ -205,20 +223,22 @@ Board::Board(size_t column, size_t row)
 
 Board::~Board(void)
 {
-	INFO("Board::~Board");
+	I("Board::~Board");
 
-	std::cout << "\033[0m\e[2J\e[?25h\033[1;1H";
+	::gotoYX(1, 1);
 }
 
 void Board::show(void)
 {
-	INFO("Board::show");
+	I("Board::show");
 
 	_updateBuffer();
 
 	_buffer.forEach([&] (Array<int> &array) mutable -> void
 	{
-		std::cout << "\033[" << array[0] - 2 << ";" << (array[1] + 6) * 2 << "H" << ::stateColor(_table[array[0]][array[1]]) << "██";
+		::gotoYX(array[0] - 2, (array[1] + 6) * 2);
+		::setConsoleColor(::stateColor(_table[array[0]][array[1]]));
+		std::cout << "  ";
 	});
 
 	_buffer.clear();
@@ -228,7 +248,7 @@ void Board::show(void)
 
 void Board::clear(void)
 {
-	INFO("Board::clear");
+	I("Board::clear");
 
 	_table.forEach([&] (Array<NodeState> &array) mutable -> void
 	{
@@ -244,7 +264,7 @@ void Board::clear(void)
 
 void Board::rotateBlock(bool dir)
 {
-	INFO("Board::rotateBlock");
+	I("Board::rotateBlock");
 
 	auto collision = [&] (void) mutable -> bool
 	{
@@ -325,7 +345,7 @@ void Board::rotateBlock(bool dir)
 
 void Board::dropBlock(void)
 {
-	INFO("Board::dropBlock");
+	I("Board::dropBlock");
 
 	_eraseBlock();
 	_eraseShadow();
@@ -356,7 +376,7 @@ void Board::dropBlock(void)
 
 void Board::holdBlock(void)
 {
-	INFO("Board::holdBlock");
+	I("Board::holdBlock");
 
 	_eraseBlock();
 	_eraseShadow();
@@ -383,7 +403,7 @@ void Board::holdBlock(void)
 
 void Board::moveBlockDown(void)
 {
-	INFO("Board::moveBlockDown");
+	I("Board::moveBlockDown");
 
 	static int drop = 0;
 
@@ -433,13 +453,12 @@ void Board::moveBlockDown(void)
 
 int Board::moveBlockLeft(void)
 {
-	INFO("Board::moveBlockDown");
+	I("Board::moveBlockDown");
 
 	int x = _block.x(), y = _block.y();
 	Array<Array<int> > &_left = _block.left();
 	NodeState state;
 
-	// Check if _block is at buttom
 	for (size_t i = 0, size = _left.size(); i < size; i++)
 	{
 		if (x + _left[i][1] - 1 >= 0)
@@ -468,13 +487,12 @@ int Board::moveBlockLeft(void)
 
 int Board::moveBlockRight(void)
 {
-	INFO("Board::moveBlockDown");
+	I("Board::moveBlockDown");
 
 	int x = _block.x(), y = _block.y();
 	Array<Array<int> > &_right = _block.right();
 	NodeState state;
 
-	// Check if _block is at buttom
 	for (size_t i = 0, size = _right.size(); i < size; i++)
 	{
 		if (x + _right[i][1] + 1 < _table[0].size())
@@ -503,7 +521,7 @@ int Board::moveBlockRight(void)
 
 void Board::_genBlock(void)
 {
-	INFO("Board::_genBlock");
+	I("Board::_genBlock");
 
 	_block = Block(_blkGen.getBlock());
 	_block.move(0, _table[0].size() / 2);
@@ -511,7 +529,7 @@ void Board::_genBlock(void)
 
 void Board::_updateBuffer(void)
 {
-	INFO("Board::_updateBuffer");
+	I("Board::_updateBuffer");
 
 	Array<int> test;
 
@@ -549,7 +567,7 @@ void Board::_updateBuffer(void)
 
 void Board::_printShadow(void)
 {
-	INFO("Board::_printShadow");
+	I("Board::_printShadow");
 
 	size_t height = ::heightOf(_block, _table);
 	int y = _block.y(), x = _block.x();
@@ -562,7 +580,7 @@ void Board::_printShadow(void)
 
 void Board::_eraseShadow(void)
 {
-	INFO("Board::_ersaeShadow");
+	I("Board::_ersaeShadow");
 
 	size_t height = ::heightOf(_block, _table);
 	int y = _block.y(), x = _block.x();
@@ -575,7 +593,7 @@ void Board::_eraseShadow(void)
 
 void Board::_printBlock(void)
 {
-	INFO("Board::_printBlock");
+	I("Board::_printBlock");
 
 	int x = _block.x(), y = _block.y();
 	NodeState state = ::blockState(_block.type());
@@ -588,7 +606,7 @@ void Board::_printBlock(void)
 
 void Board::_eraseBlock(void)
 {
-	INFO("Board::_eraseBlock");
+	I("Board::_eraseBlock");
 
 	int x = _block.x(), y = _block.y();
 
@@ -602,9 +620,10 @@ bool Board::_pileOverHeight(void)
 {
 	for(size_t i = 0, size = _block.top().size(); i < size; i++)
 	{
-		if(_block.top()[i][0] + _block.y() <= 3)
+		if(_block.top()[i][0] + _block.y() < 3)
 			return true;
 	}
 
 	return false;
 }
+
