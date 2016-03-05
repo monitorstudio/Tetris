@@ -201,6 +201,7 @@ Board::Board(size_t column, size_t row)
 	_blkHolder = BlockHolder();
 	_blkGen = BlockGenerator(0, _table[0].size());
 	_genBlock();
+	show();
 }
 
 Board::~Board(void)
