@@ -1,5 +1,5 @@
 CXX=clang++
-CXXFLAGS=-std=c++14 -Ofast -g3 -static
+CXXFLAGS=-std=c++14 -Wall -pedantic -Ofast -g3 -static
 STRIP=strip
 
 all:
@@ -9,8 +9,8 @@ release: debug
 	cp Tetris.dbg Tetris
 	$(STRIP) Tetris
 
-debug: main Board Tetris Block Logger
-	$(CXX) $(CXXFLAGS) -o Tetris.dbg main.o Board.o Tetris.o Block.o Logger.o
+debug: main Board Tetris KeyInput Block Logger
+	$(CXX) $(CXXFLAGS) -o Tetris.dbg main.o Board.o Tetris.o KeyInput.o Block.o Logger.o
 
 main: Board.hpp Array.hpp Block.hpp Logger.hpp main.cpp
 	$(CXX) $(CXXFLAGS) -c main.cpp
@@ -20,6 +20,9 @@ Board: Board.hpp Tetris.hpp Block.hpp Array.hpp Logger.hpp Board.cpp
 
 Tetris: Tetris.hpp Tetris.cpp
 	$(CXX) $(CXXFLAGS) -c Tetris.cpp
+
+KeyInput: KeyInput.hpp KeyInput.cpp
+	$(CXX) $(CXXFLAGS) -c KeyInput.cpp
 
 Block: Block.hpp Array.hpp Logger.hpp Block.cpp
 	$(CXX) $(CXXFLAGS) -c Block.cpp
