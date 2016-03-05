@@ -9,6 +9,31 @@
 #define CLOCKWISE true
 #define COUNTERCLOCKWISE false
 
+class BlockHolder
+{
+public:
+	BlockHolder(void);
+	void hold(block_t &);
+	void clear(void);
+	void reset(void);
+private:
+	block_t _hold;
+};
+
+class BlockGenerator
+{
+public:
+	BlockGenerator(void);
+	BlockGenerator(int, int);
+	block_t getBlock(void);
+	void reset(void);
+private:
+	int _y, _x;
+	int _pos;
+	block_t _nextBlock(void);
+	std::deque<block_t> _buffer;
+};
+
 typedef enum
 {
 	STATE_OFF,
@@ -38,24 +63,25 @@ public:
 	~Board(void);
 	void show(void);
 	void clear(void);
-	void autoPlay(void);
-	void rotateBlock(bool);
-	void dropBlock(void);
-	void holdBlock(void);
-	void moveBlockDown(void);
-	int moveBlockLeft(void);
-	int moveBlockRight(void);
+	void auto_play(void);
+	void rotate_block(bool);
+	void drop_block(void);
+	void hold_block(void);
+	void move_block_down(void);
+	int move_block_left(void);
+	int move_block_right(void);
+        void set_clear_during(unsigned during);
 private:
-	void _genBlock(void);
-	void _updateBuffer(void);
-	void _printShadow(void);
-	void _eraseShadow(void);
-	void _printBlock(void);
-	void _eraseBlock(void);
-	bool _pileOverHeight(void);
+	void _gen_block(void);
+	void _update_buffer(void);
+	void _print_shadow(void);
+	void _erase_shadow(void);
+	void _print_block(void);
+	void _erase_block(void);
+	bool _pile_over_height(void);
 	Block _block;
-	BlockHolder _blkHolder;
-	BlockGenerator _blkGen;
+	BlockHolder _blk_holder;
+	BlockGenerator _blk_gen;
 	Array<Array<NodeState> > _table;
 	Array<Array<int> > _buffer;
 };
