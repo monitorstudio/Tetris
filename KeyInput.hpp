@@ -12,8 +12,7 @@ enum KeyState { RELEASED, PRESSED,
 class Input
 {
 public:
-        Input(void);    // not impled
-        Input(std::string kbd_path);
+        Input(void);
 
         void _update(void);
         std::deque<int> get_pressed_keys(void);
@@ -30,3 +29,4 @@ private:
 };
 
 #endif  // KEYINPUT_HPP_
+

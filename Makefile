@@ -1,21 +1,20 @@
-CXX=clang++
-CXXFLAGS=-std=c++14 -Wall -pedantic -Ofast -g3 -static
+CXX=g++
+CXXFLAGS=-std=c++14 -Ofast -static
 STRIP=strip
 
 all:
 	make release -j8
 
 release: debug
-	cp Tetris.dbg Tetris
-	$(STRIP) Tetris
+	$(STRIP) Tetris.exe
 
-debug: main Board Tetris KeyInput Block Logger
-	$(CXX) $(CXXFLAGS) -o Tetris.dbg main.o Board.o Tetris.o KeyInput.o Block.o Logger.o
+debug: main Board Tetris KeyInput Block
+	$(CXX) $(CXXFLAGS) -o Tetris.exe main.o Board.o Tetris.o KeyInput.o Block.o
 
-main: Board.hpp Array.hpp Block.hpp Logger.hpp main.cpp
+main: Board.hpp Array.hpp Block.hpp main.cpp
 	$(CXX) $(CXXFLAGS) -c main.cpp
 
-Board: Board.hpp Tetris.hpp Block.hpp Array.hpp Logger.hpp Board.cpp
+Board: Board.hpp Tetris.hpp Block.hpp Array.hpp Board.cpp
 	$(CXX) $(CXXFLAGS) -c Board.cpp
 
 Tetris: Tetris.hpp Tetris.cpp
@@ -24,11 +23,8 @@ Tetris: Tetris.hpp Tetris.cpp
 KeyInput: KeyInput.hpp KeyInput.cpp
 	$(CXX) $(CXXFLAGS) -c KeyInput.cpp
 
-Block: Block.hpp Array.hpp Logger.hpp Block.cpp
+Block: Block.hpp Array.hpp Block.cpp
 	$(CXX) $(CXXFLAGS) -c Block.cpp
-
-Logger: Logger.hpp Logger.cpp
-	$(CXX) $(CXXFLAGS) -c Logger.cpp
 
 .PHONY clean:
 	rm Tetris.dbg Tetris *.o
