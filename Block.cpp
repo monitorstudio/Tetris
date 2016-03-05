@@ -19,7 +19,7 @@ namespace {
 		}
 	}
 
-	unsigned blockId(block_t type)
+	int blockId(block_t type)
 	{
 		switch(type)
 		{
@@ -99,7 +99,7 @@ Block::Block(block_t type)
 		break;
 	}
 
-	_findBrim();
+	_find_brim();
 }
 
 block_t Block::type(void)
@@ -153,15 +153,15 @@ void Block::rotate(void)
 
 	if(_type != BLK_O)	// No Need To Rotate Block O
 	{
-		_blocks.forEach([&] (Array<int> &array) mutable -> void
+		_blocks.for_each([&] (Array<int> &array) mutable -> void
 		{
 			int i = array[0];
 			array[0] = array[1];
 			array[1] = -i;
 		});
 
-		_moveCenter();
-		_findBrim();
+		_move_center();
+		_find_brim();
 	}
 
 	// Update Rotation Status
@@ -185,16 +185,16 @@ void Block::move(int my, int mx)
 	INFO("_block._x = " << _x);
 }
 
-void Block::_findBrim(void)
+void Block::_find_brim(void)
 {
-	INFO("Block::_findBrim");
+	INFO("Block::_find_brim");
 
 	_top.clear();
 	_buttom.clear();
 	_left.clear();
 	_right.clear();
 
-	_blocks.forEach([&] (Array<int> &array) mutable -> void
+	_blocks.for_each([&] (Array<int> &array) mutable -> void
 	{
 		Array<int> test = array;
 
@@ -232,7 +232,7 @@ void Block::_findBrim(void)
 }
 			
 
-void Block::_moveCenter(void)	// Correct Center On Each Rotation Status
+void Block::_move_center(void)	// Correct Center On Each Rotation Status
 {
 	int my = 0, mx = 0;
 
@@ -262,9 +262,14 @@ void Block::_moveCenter(void)	// Correct Center On Each Rotation Status
 	case BLK_S:
 	case BLK_Z:
 		_y += my, _x += mx;
-		_blocks.forEach([&](Array<int> &array) mutable -> void { array[0] -= my, array[1] -= mx; });
+		_blocks.for_each([&](Array<int> &array) mutable -> void { array[0] -= my, array[1] -= mx; });
 		break;
-	default:
-		break;
+        case BLK_O:
+        case BLK_L:
+        case BLK_J:
+        case BLK_T:
+                break;
+        case BLK_E:
+                break;
 	}
 }
