@@ -81,7 +81,7 @@ public:
 		return false;
 	}
 
-	void forEach(std::function<void(T &, size_t)> map)
+	void for_each(std::function<void(T &, size_t)> map)
 	{
 		for(size_t i = 0, size = _array.size(); i < size; i++)
 		{
@@ -89,7 +89,7 @@ public:
 		}
 	}
 
-	void forEach(std::function<void(T &)> map)
+	void for_each(std::function<void(T &)> map)
 	{
 		for(size_t i = 0, size = _array.size(); i < size; i++)
 		{
