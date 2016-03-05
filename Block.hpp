@@ -33,8 +33,8 @@ public:
 	void rotate(void);	// Conter
 	void move(int, int);	// Move y, x
 private:
-	void _findBrim(void);
-	void _moveCenter(void);
+	void _find_brim(void);
+	void _move_center(void);
 	block_t _type;
 	int _x, _y;
 	int _rotation;
