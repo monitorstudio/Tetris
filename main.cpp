@@ -1,14 +1,21 @@
-#include <windows.h>
 #include <iostream>
 #include <cstdio>
+#include <functional>
 #include <cstdio>
 #include <cstring>
 #include <ctime>
 #include <unistd.h>
-
+#include <termios.h>
+#include <fcntl.h>
+#include <linux/input.h>
+#include <sys/timeb.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "Board.hpp"
+
 #include "KeyInput.hpp"
 
+static struct termios t_old, t_new;
 static const char splash[] =
 "                                                                         \n\
    _|_|_|            _|      _|            _|_|_|_|_|          _|_|_|    \n\
@@ -30,7 +37,7 @@ int main()
         show_splash();
 
         Board board = Board(20, 10);
-        Input input = Input();
+        Input input = Input("/dev/input/by-path/platform-80860F41:00-event-kbd");
 
         echo_off();
         ftime(&start);
@@ -48,27 +55,31 @@ int main()
                 {
                         switch(pressed_keys[i])
                         {
-                        case VK_UP:
+                        case KEY_UP:
                                 board.rotate_block(CLOCKWISE);
                                 break;
-                        case VK_LSHIFT:
-                        case VK_RSHIFT:
+                        case KEY_LEFTSHIFT:
+                        case KEY_RIGHTSHIFT:
                                 board.hold_block();
                                 break;
-                        case VK_LCONTROL:
-                        case VK_RCONTROL:
+                        case KEY_LEFTCTRL:
+                        case KEY_RIGHTCTRL:
                                 board.rotate_block(COUNTERCLOCKWISE);
                                 break;
-                        case VK_SPACE:
+                        case KEY_SPACE:
                                 board.drop_block();
                                 break;
-                        case VK_DOWN:
+                        case KEY_Q:
+                                echo_on();
+                                return 0;
+                                break;
+                        case KEY_DOWN:
                                 board.move_block_down();
                                 break;
-                        case VK_LEFT:
+                        case KEY_LEFT:
                                 board.move_block_left();
                                 break;
-                        case VK_RIGHT:
+                        case KEY_RIGHT:
                                 board.move_block_right();
                                 break;
                         default:
@@ -82,13 +93,13 @@ int main()
                         {
                                 switch(continus_keys[i])
                                 {
-                                case VK_DOWN:
+                                case KEY_DOWN:
                                         board.move_block_down();
                                         break;
-                                case VK_LEFT:
+                                case KEY_LEFT:
                                         board.move_block_left();
                                         break;
-                                case VK_RIGHT:
+                                case KEY_RIGHT:
                                         board.move_block_right();
                                         break;
                                 default:
@@ -120,26 +131,27 @@ void show_splash(void)
                 {
                 case ' ':
                 case '\n':
-				        set_console_color(YELLOW);
-                        std::cout << splash[i];
+                        std::cout << "\033[0m" << splash[i];
                         break;
                 default:
-				        set_console_color(BLUE);
-                        std::cout << splash[i];
+                        std::cout << "\033[1;34m" << splash[i];
                         break;
                 }
         }
         std::fflush(stdout);
         sleep(3);
-		::clear();
 }
 
 void echo_off(void)
 {
-    // TODO Impl this function
+        tcgetattr(STDIN_FILENO, &t_old);
+	memcpy(&t_new, &t_old, sizeof(struct termios));
+	t_new.c_lflag &= static_cast<unsigned>(~( ECHO | ICANON | ECHOE | ECHOK | ECHONL | ECHOPRT | ECHOKE | ICRNL));
+	tcsetattr(STDIN_FILENO, TCSANOW, &t_new);
 }
 
 void echo_on(void)
 {
-    // TODO Impl this function
+        tcsetattr(STDIN_FILENO, TCSANOW, &t_old);
 }
+

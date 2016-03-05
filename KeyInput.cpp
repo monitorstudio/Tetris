@@ -1,22 +1,25 @@
-#include <windows.h>
 #include <cstdio>
 #include <cstring>
 #include <cassert>
 #include <cstddef>
+#include <fcntl.h>
+#include <linux/input.h>
 
 #include "KeyInput.hpp"
 
 static int keys[] =
 {
-        VK_UP,          VK_DOWN,
-        VK_LEFT,        VK_RIGHT,
-        VK_LSHIFT,      VK_RSHIFT,
-        VK_LCONTROL,    VK_RCONTROL,
-        VK_SPACE
+        KEY_UP,         KEY_DOWN,
+        KEY_LEFT,       KEY_RIGHT,
+        KEY_LEFTSHIFT,  KEY_RIGHTSHIFT,
+        KEY_LEFTCTRL,   KEY_RIGHTCTRL,
+        KEY_SPACE,      KEY_Q
 };
 
-Input::Input(void)
+Input::Input(std::string kbd_path)
 {
+        assert((_kbd = open(kbd_path.c_str(), O_RDONLY)) != -1);
+
         for(std::size_t i = 0; i < sizeof(keys) / sizeof(int); i++)
                 _status_table[keys[i]] = RELEASED;
 }
@@ -118,10 +121,11 @@ void Input::_press(const std::deque<int> &pressed)
 
 bool Input::_key_pressed(int key)
 {
-        BYTE state[256];
+        char key_b[(KEY_MAX + 7) / 8];
 
-        GetKeyboardState(state);
+	memset(key_b, 0, sizeof(key_b));
+	ioctl(_kbd, EVIOCGKEY(sizeof(key_b)), key_b);
 
-        return (bool)((unsigned short)GetKeyState(key) >> ((sizeof(SHORT) * 8) - 1));
+	return !!(key_b[key / 8] & (1 << (key % 8)));
 }
 

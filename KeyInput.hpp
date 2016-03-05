@@ -12,7 +12,8 @@ enum KeyState { RELEASED, PRESSED,
 class Input
 {
 public:
-        Input(void);
+        Input(void);    // not impled
+        Input(std::string kbd_path);
 
         void _update(void);
         std::deque<int> get_pressed_keys(void);
