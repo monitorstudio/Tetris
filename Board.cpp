@@ -1,13 +1,207 @@
 #include <iostream>
-
 #include <cstddef>
 #include <ctime>
-
 #include <deque>
+#include <unistd.h>
 
-#include "unistd.h"
 #include "Board.hpp"
 #include "Logger.hpp"
+
+#define LARGE true
+#define SMALL false
+
+namespace {
+
+	const char *blkColor(block_t type)
+	{
+		switch(type)
+		{
+		case BLK_E:	return DEFAULT;
+		case BLK_I:	return CYAN;
+		case BLK_O:	return YELLOW;
+		case BLK_S:	return GREEN;
+		case BLK_Z:	return RED;
+		case BLK_L:	return ORANGE;
+		case BLK_J:	return BLUE;
+		case BLK_T:	return PURPLE;
+		default:	return WHITE;
+		}
+	}
+
+	void box(bool size, int y, int x)
+	{
+		if(size == LARGE)
+		{
+			for(int i = y; i < y + 4; i++)
+                        {
+                                goto_yx(i, x);
+                                print_cell(BGWHITE, 7);
+                        }
+		}
+		else if(size == SMALL)
+		{
+			for(int i = y; i < y + 4; i++)
+                        {
+                                ::goto_yx(i, x);
+                                ::print_cell(BGWHITE, 6);
+                        }
+		}
+
+
+                ::print_cell(DEFAULT, 0);
+	}
+
+	void box(bool size, block_t type, int y, int x)
+	{
+		Block block = Block(type);
+
+		box(size, y, x);
+
+		if(size == LARGE)
+		{
+			block.blocks().for_each([&] (Array<int> &coord) mutable -> void
+			{
+				switch(type)
+				{
+				case BLK_I:
+                                        ::goto_yx(coord[0] + 1 + y, coord[1] + 3 + x);
+                                        ::print_cell(::blkColor(type), 3);
+					break;
+				case BLK_O:
+                                        ::goto_yx(coord[0] + 1 + y, coord[1] * 2 + 2 + x);
+                                        ::print_cell(::blkColor(type));
+					break;
+				case BLK_Z:
+                                        ::goto_yx(coord[0] + 1 + y, coord[1] * 2 + 3 + x);
+                                        ::print_cell(::blkColor(type));
+					break;
+				case BLK_S:
+				case BLK_L:
+				case BLK_J:
+				case BLK_T:
+                                        ::goto_yx(coord[0] + 2 + y, coord[1] * 2 + 3 + x);
+                                        ::print_cell(::blkColor(type));
+					break;
+				case BLK_E:
+					break;
+				}
+			});
+		}
+		else if(size == SMALL)
+		{
+			block.blocks().for_each([&] (Array<int> &coord) mutable -> void
+			{
+				switch(type)
+				{
+				case BLK_I:
+                                        ::goto_yx(coord[0] + 1 + y, coord[1] + 3 + x);
+                                        ::print_cell(::blkColor(type));
+					break;
+				case BLK_O:
+                                        ::goto_yx(coord[0] + 1 + y, coord[1] + 1 + x);
+                                        ::print_cell(::blkColor(type));
+					break;
+				case BLK_Z:
+                                        ::goto_yx(coord[0] + 1 + y, coord[1] + 2 + x);
+                                        ::print_cell(::blkColor(type));
+					break;
+				case BLK_S:
+				case BLK_L:
+				case BLK_J:
+				case BLK_T:
+                                        ::goto_yx(coord[0] + 2 + y, coord[1] + 2 + x);
+                                        ::print_cell(::blkColor(type));
+					break;
+				case BLK_E:
+					break;
+				}
+			});
+		}
+
+                ::print_cell(DEFAULT, 0);
+	}
+
+}
+
+BlockHolder::BlockHolder(void)
+{
+	reset();
+}
+
+void BlockHolder::hold(block_t &type)
+{
+	{	block_t swap = type;
+		type = _hold;
+		_hold = swap;
+	}
+
+	box(LARGE, _hold, 2, 2);
+}
+
+void BlockHolder::clear(void)
+{
+	box(LARGE, 2, 2);
+}
+
+void BlockHolder::reset(void)
+{
+	_hold = BLK_E;
+
+	clear();
+}
+
+BlockGenerator::BlockGenerator(void)
+{
+}
+
+BlockGenerator::BlockGenerator(int y, int x)
+{
+	srand(static_cast<unsigned>(time(NULL)));
+
+	y = _y, _x = x;
+	_pos = 7;
+}
+
+block_t BlockGenerator::getBlock(void)
+{
+	while(_buffer.size() <= 5)
+		_buffer.push_back(_nextBlock());
+
+	block_t block = _buffer.front();
+	_buffer.pop_front();
+
+	box(LARGE, _buffer[0], _y + 2, _x * 2 + 14);
+	for(int i = 1; i < 4; i++)
+		box(SMALL, _buffer[i], _y + 3 + i * 4, _x * 2 + 14);
+
+	return block;
+}
+
+void BlockGenerator::reset(void)
+{
+	_buffer.clear();
+	_pos = 7;
+}
+
+block_t BlockGenerator::_nextBlock(void)
+{
+	static block_t array[7] = { BLK_I, BLK_O, BLK_S, BLK_Z, BLK_L, BLK_J, BLK_T };
+
+	if(_pos == 7)
+	{
+		for (size_t i = 0; i < 7; i++)
+			{
+				int rnd = rand() % 7;
+				block_t t = array[i];
+				array[i] = array[rnd];
+				array[rnd] = t;
+			}
+
+		_pos = 0;
+	}
+
+	return array[_pos++];
+}
 
 namespace {
 	NodeState swState(NodeState state)
@@ -60,23 +254,6 @@ namespace {
 		}
 	}
 
-	block_t stateBlock(NodeState state)
-	{
-		switch(state)
-		{
-		case STATE_OFF:		case SWITCH_OFF:
-		case STATE_SHADOW:	case SWITCH_SHADOW:	return BLK_E;
-		case STATE_I:		case SWITCH_I:		return BLK_I;
-		case STATE_O:		case SWITCH_O:		return BLK_O;
-		case STATE_S:		case SWITCH_S:		return BLK_S;
-		case STATE_Z:		case SWITCH_Z:		return BLK_Z;
-		case STATE_L:		case SWITCH_L:		return BLK_L;
-		case STATE_J:		case SWITCH_J:		return BLK_J;
-		case STATE_T:		case SWITCH_T:		return BLK_T;
-		default:					return BLK_E;
-		}
-	}
-
 	const char *stateColor(NodeState state)
 	{
 		switch(state)
@@ -98,25 +275,25 @@ namespace {
 	{
 		size_t height = table.size(), i;
 
-		block.buttom().forEach([&] (Array<int> &pair) mutable -> void
+		block.buttom().for_each([&] (Array<int> &coord) mutable -> void
 		{
-			if(pair[0] + block.y() == table.size() - 1)
+			if(coord[0] + block.y() == table.size() - 1)
 				height = 0;
 
-			for(i = pair[0] + block.y() + 1; i < table.size(); i++)
+			for(i = coord[0] + block.y() + 1; i < table.size(); i++)
 			{
-				NodeState state = table[i][block.x() + pair[1]];
+				NodeState state = table[i][block.x() + coord[1]];
 
 				if(state != STATE_OFF && state != SWITCH_OFF && state != STATE_SHADOW && state != SWITCH_SHADOW)
 				{
-					if(i - block.y() - pair[0] - 1 < height)
-						height = i - block.y() - pair[0] - 1;
+					if(i - block.y() - coord[0] - 1 < height)
+						height = i - block.y() - coord[0] - 1;
 
 					break;
 				}
 
-				if(i == table.size() - 1 && i - block.y() - pair[0] < height)
-					height = i - block.y() - pair[0];
+				if(i == table.size() - 1 && i - block.y() - coord[0] < height)
+					height = i - block.y() - coord[0];
 			}
 		});
 
@@ -129,7 +306,7 @@ namespace {
 
 		Array<int> toClear;
 
-		table.forEach([&] (Array<NodeState> &array, size_t column) mutable -> void
+		table.for_each([&] (Array<NodeState> &array, size_t column) mutable -> void
 		{
 			NodeState state;
 
@@ -145,9 +322,9 @@ namespace {
 			}
 		});
 
-		toClear.forEach([&] (int &column) mutable -> void
+		toClear.for_each([&] (int &column) mutable -> void
 		{
-			table[column].forEach([&] (NodeState &state) mutable -> void
+			table[column].for_each([&] (NodeState &state) mutable -> void
 			{
 				state = SWITCH_OFF;
 			});
@@ -156,9 +333,8 @@ namespace {
 		if(toClear.size() != 0)
 		{
 			board.show();
-			usleep(100000);
 
-			toClear.forEach([&] (int &column) mutable -> void
+			toClear.for_each([&] (int &column) mutable -> void
 			{
 				for(int start = column; start >= 1; start--)
 				{
@@ -173,7 +349,7 @@ namespace {
 					}
 				}
 
-				table[0].forEach([&] (NodeState &state) mutable -> void
+				table[0].for_each([&] (NodeState &state) mutable -> void
 				{
 					if(state != STATE_OFF && state != SWITCH_OFF && state != STATE_SHADOW && state != SWITCH_SHADOW)
 					{
@@ -181,6 +357,8 @@ namespace {
 					}
 				});
 			});
+
+			usleep(150000);
 		}
 
 		return toClear.size();
@@ -192,34 +370,40 @@ Board::Board(size_t column, size_t row)
 {
 	INFO("Board::Board");
 
-	std::cout << "\e[?25l\e[1;1H\e[2J";
+        ::hide_cursor();
+        ::clear();
+        ::goto_yx(1, 1);
 
 	for(size_t y = 0; y < column + 2; y++)
 	for(size_t x = 0; x < row; x++)
 		_table[y][x] = SWITCH_OFF;
 
-	_blkHolder = BlockHolder();
-	_blkGen = BlockGenerator(0, _table[0].size());
-	_genBlock();
-	show();
+	_blk_holder = BlockHolder();
+	_blk_gen = BlockGenerator(0, _table[0].size());
+	_gen_block();
+        show();
 }
 
 Board::~Board(void)
 {
 	INFO("Board::~Board");
 
-	std::cout << "\033[0m\e[2J\e[?25h\033[1;1H";
+        ::print_cell(DEFAULT, 0);
+        ::clear();
+        ::show_cursor();
+        ::goto_yx(1, 1);
 }
 
 void Board::show(void)
 {
 	INFO("Board::show");
 
-	_updateBuffer();
+	_update_buffer();
 
-	_buffer.forEach([&] (Array<int> &array) mutable -> void
+	_buffer.for_each([&] (Array<int> &array) mutable -> void
 	{
-		std::cout << "\033[" << array[0] - 2 << ";" << (array[1] + 6) * 2 << "H" << ::stateColor(_table[array[0]][array[1]]) << "██";
+                ::goto_yx(array[0] - 2, (array[1] + 6) * 2);
+                ::print_cell(::stateColor(_table[array[0]][array[1]]));
 	});
 
 	_buffer.clear();
@@ -231,9 +415,9 @@ void Board::clear(void)
 {
 	INFO("Board::clear");
 
-	_table.forEach([&] (Array<NodeState> &array) mutable -> void
+	_table.for_each([&] (Array<NodeState> &array) mutable -> void
 	{
-		array.forEach([&] (NodeState &state) mutable -> void
+		array.for_each([&] (NodeState &state) mutable -> void
 		{
 			if(state != STATE_OFF && state != SWITCH_OFF)
 				state = SWITCH_OFF;
@@ -243,9 +427,9 @@ void Board::clear(void)
 	show();
 }
 
-void Board::rotateBlock(bool dir)
+void Board::rotate_block(bool dir)
 {
-	INFO("Board::rotateBlock");
+	INFO("Board::rotate_block");
 
 	auto collision = [&] (void) mutable -> bool
 	{
@@ -301,8 +485,8 @@ void Board::rotateBlock(bool dir)
 		}
 	};
 
-	_eraseBlock();
-	_eraseShadow();
+	_erase_block();
+	_erase_shadow();
 
 	if(dir == CLOCKWISE)
 	{
@@ -318,57 +502,57 @@ void Board::rotateBlock(bool dir)
 	if(collision() == true)
 		adjust();
 
-	_printShadow();
-	_printBlock();
+	_print_shadow();
+	_print_block();
 
 	show();
 }
 
-void Board::dropBlock(void)
+void Board::drop_block(void)
 {
-	INFO("Board::dropBlock");
+	INFO("Board::drop_block");
 
-	_eraseBlock();
-	_eraseShadow();
+	_erase_block();
+	_erase_shadow();
 
 	_block.move(::heightOf(_block, _table), 0);
 
-	if(_pileOverHeight() == true)
+	if(_pile_over_height() == true)
 	{
 		clear();
-		_blkGen.reset();
-		_blkHolder.reset();
+		_blk_gen.reset();
+		_blk_holder.reset();
 	}
 	else
 	{
-		_printBlock();
+		_print_block();
 		::clearLines(*this, _table);
 	}
 
 	show();
 
-	_genBlock();
+	_gen_block();
 
-	_printShadow();
-	_printBlock();
+	_print_shadow();
+	_print_block();
 
 	show();
 }
 
-void Board::holdBlock(void)
+void Board::hold_block(void)
 {
-	INFO("Board::holdBlock");
+	INFO("Board::hold_block");
 
-	_eraseBlock();
-	_eraseShadow();
+	_erase_block();
+	_erase_shadow();
 
 	block_t block = _block.type();
 
-	_blkHolder.hold(block);
+	_blk_holder.hold(block);
 
 	if(block == BLK_E)
 	{
-		_genBlock();
+		_gen_block();
 	}
 	else
 	{
@@ -376,15 +560,15 @@ void Board::holdBlock(void)
 		_block.move(0, _table[0].size() / 2);
 	}
 
-	_printShadow();
-	_printBlock();
+	_print_shadow();
+	_print_block();
 
 	show();
 }
 
-void Board::moveBlockDown(void)
+void Board::move_block_down(void)
 {
-	INFO("Board::moveBlockDown");
+	INFO("Board::move_block_down");
 
 	static int drop = 0;
 
@@ -414,7 +598,7 @@ void Board::moveBlockDown(void)
 	{
 		if(drop == 4)
 		{
-			dropBlock();
+			drop_block();
 			drop = 0;
 		}
 		else
@@ -423,18 +607,18 @@ void Board::moveBlockDown(void)
 	else
 	{
 		drop = 0;
-		_eraseBlock();
-		_eraseShadow();
+		_erase_block();
+		_erase_shadow();
 		_block.move(1, 0);
-		_printShadow();
-		_printBlock();
+		_print_shadow();
+		_print_block();
 		show();
 	}
 }
 
-int Board::moveBlockLeft(void)
+int Board::move_block_left(void)
 {
-	INFO("Board::moveBlockDown");
+	INFO("Board::move_block_down");
 
 	int x = _block.x(), y = _block.y();
 	Array<Array<int> > &_left = _block.left();
@@ -454,22 +638,22 @@ int Board::moveBlockLeft(void)
 			return -1;
 	}
 
-	_eraseBlock();
-	_eraseShadow();
+	_erase_block();
+	_erase_shadow();
 
 	_block.move(0, -1);
 
-	_printShadow();
-	_printBlock();
+	_print_shadow();
+	_print_block();
 
 	show();
 
 	return 0;
 }
 
-int Board::moveBlockRight(void)
+int Board::move_block_right(void)
 {
-	INFO("Board::moveBlockDown");
+	INFO("Board::move_block_down");
 
 	int x = _block.x(), y = _block.y();
 	Array<Array<int> > &_right = _block.right();
@@ -489,36 +673,36 @@ int Board::moveBlockRight(void)
 			return -1;
 	}
 
-	_eraseBlock();
-	_eraseShadow();
+	_erase_block();
+	_erase_shadow();
 
 	_block.move(0, 1);
 
-	_printShadow();
-	_printBlock();
+	_print_shadow();
+	_print_block();
 
 	show();
 
 	return 0;
 }
 
-void Board::_genBlock(void)
+void Board::_gen_block(void)
 {
-	INFO("Board::_genBlock");
+	INFO("Board::_gen_block");
 
-	_block = Block(_blkGen.getBlock());
+	_block = Block(_blk_gen.getBlock());
 	_block.move(0, _table[0].size() / 2);
 }
 
-void Board::_updateBuffer(void)
+void Board::_update_buffer(void)
 {
-	INFO("Board::_updateBuffer");
+	INFO("Board::_update_buffer");
 
 	Array<int> test;
 
-	_table.forEach([&] (Array<NodeState> &array, size_t y) mutable -> void
+	_table.for_each([&] (Array<NodeState> &array, size_t y) mutable -> void
 	{
-		array.forEach([&] (NodeState &state, size_t x) mutable -> void
+		array.for_each([&] (NodeState &state, size_t x) mutable -> void
 		{
 			if(y >=2)
 			{
@@ -548,58 +732,58 @@ void Board::_updateBuffer(void)
 	});
 }
 
-void Board::_printShadow(void)
+void Board::_print_shadow(void)
 {
-	INFO("Board::_printShadow");
+	INFO("Board::_print_shadow");
 
 	size_t height = ::heightOf(_block, _table);
 	int y = _block.y(), x = _block.x();
 
-	_block.blocks().forEach([&](Array<int> &pair) mutable -> void
+	_block.blocks().for_each([&](Array<int> &coord) mutable -> void
 	{
-		_table[y + pair[0] + height][x + pair[1]] = SWITCH_SHADOW;
+		_table[y + coord[0] + height][x + coord[1]] = SWITCH_SHADOW;
 	});
 }
 
-void Board::_eraseShadow(void)
+void Board::_erase_shadow(void)
 {
 	INFO("Board::_ersaeShadow");
 
 	size_t height = ::heightOf(_block, _table);
 	int y = _block.y(), x = _block.x();
 
-	_block.blocks().forEach([&](Array<int> &pair) mutable -> void
+	_block.blocks().for_each([&](Array<int> &coord) mutable -> void
 	{
-		_table[y + pair[0] + height][x + pair[1]] = SWITCH_OFF;
+		_table[y + coord[0] + height][x + coord[1]] = SWITCH_OFF;
 	});
 }
 
-void Board::_printBlock(void)
+void Board::_print_block(void)
 {
-	INFO("Board::_printBlock");
+	INFO("Board::_print_block");
 
 	int x = _block.x(), y = _block.y();
 	NodeState state = ::blockState(_block.type());
 
-	_block.blocks().forEach([&](Array<int> &pair) mutable -> void
+	_block.blocks().for_each([&](Array<int> &coord) mutable -> void
 	{
-		_table[y + pair[0]][x + pair[1]] = state;
+		_table[y + coord[0]][x + coord[1]] = state;
 	});
 }
 
-void Board::_eraseBlock(void)
+void Board::_erase_block(void)
 {
-	INFO("Board::_eraseBlock");
+	INFO("Board::_erase_block");
 
 	int x = _block.x(), y = _block.y();
 
-	_block.blocks().forEach([&](Array<int> &pair) mutable -> void
+	_block.blocks().for_each([&](Array<int> &coord) mutable -> void
 	{
-		_table[y + pair[0]][x + pair[1]] = SWITCH_OFF;
+		_table[y + coord[0]][x + coord[1]] = SWITCH_OFF;
 	});
 }
 
-bool Board::_pileOverHeight(void)
+bool Board::_pile_over_height(void)
 {
 	for(size_t i = 0, size = _block.top().size(); i < size; i++)
 	{
