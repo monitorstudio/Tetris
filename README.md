@@ -30,7 +30,7 @@ A Command Line Based Tetris
 </table>
 <table>
 <tr>
-	<th>Features:</th>
+	<th>Features</th>
 </tr>
 <tr>
 	<td>T-Spin Double is Supported</td>
@@ -42,4 +42,11 @@ A Command Line Based Tetris
 	<td>I-Spin, L-Spin and J-Spin is also Supported</td>
 </tr>
 </table>
-![alt tag](https://raw.githubusercontent.com/monitorstudio/Tetris/master/Screenshot.from.2016-03-04.21-51-08.png)
+<table>
+<tr>
+	<th>Screenshot</th>
+</tr>
+<tr>
+	<td><img src=https://raw.githubusercontent.com/monitorstudio/Tetris/master/Screenshot.from.2016-03-04.21-51-08.png></img></td>
+</tr>
+</table>
