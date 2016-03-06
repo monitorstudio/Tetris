@@ -19,7 +19,7 @@ A Command Line Based Tetris
 	<td>HARD DROP</td><td>SPACE</td>
 </tr>
 <tr>
-	<td>ROTATE</td><td>UP (clockwise), CTRL (counter-clockwise)</td>
+	<td>SPIN</td><td>UP (clockwise), CTRL (counter-clockwise)</td>
 </tr>
 <tr>
 	<td>HOLD</td><td>SHIFT</td>
@@ -39,7 +39,7 @@ A Command Line Based Tetris
 	<td>T-Spin Triple is Supported</td?
 </tr>
 <tr>
-	<td>I-Spin, L-Spin and J-Spin is also Supported
+	<td>I-Spin, L-Spin and J-Spin is also Supported</td>
 </tr>
 </table>
 ![alt tag](https://raw.githubusercontent.com/monitorstudio/Tetris/master/Screenshot.from.2016-03-04.21-51-08.png)
