@@ -1,7 +1,7 @@
 CXX=clang++
 CXXFLAGS=-std=c++14 -Wall -pedantic -Ofast -g3 -static
 STRIP=strip
-KB_DEVICE=""
+KB_DEVICE=
 #\"/dev/input/by-path/platform-80860F41:00-event-kbd\"
 
 all:
@@ -11,8 +11,11 @@ windows: main_win32 Board Tetris KeyInput Block
 	$(CXX) $(CXXFLAGS) -o Tetris.exe main.o Board.o Tetris.o KeyInput.o Block.o
 
 linux: main_linux Board Tetris KeyInput Block
-	ifeq(KB_DEVICE, "") $(error Please specify keyboard device path) endif
+ifndef KB_DEVICE
+$(error Please specify keyboard device path)
+endif
 	$(CXX) $(CXXFLAGS) -o Tetris main.o Board.o Tetris.o KeyInput.o Block.o
+	$(STRIP) Tetris
 
 main_win32: Board.hpp Array.hpp Block.hpp main.cpp
 	$(CXX) $(CXXFLAGS) -c main.cpp
