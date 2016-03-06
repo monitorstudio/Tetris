@@ -1,7 +1,8 @@
 CXX=clang++
 CXXFLAGS=-std=c++14 -Wall -pedantic -Ofast -g3 -static
 STRIP=strip
-KB_DEVICE=\"/dev/input/by-path/platform-80860F41:00-event-kbd\"
+KB_DEVICE=
+#\"/dev/input/by-path/platform-80860F41:00-event-kbd\"
 
 all:
 	echo 'Please specify opertaing system type -- "make linux" OR "make windows"'
