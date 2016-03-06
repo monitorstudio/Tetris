@@ -1,21 +1,36 @@
 #include <iostream>
 #include <cstdio>
-#include <functional>
 #include <cstdio>
 #include <cstring>
 #include <ctime>
 #include <unistd.h>
-#include <termios.h>
-#include <fcntl.h>
-#include <linux/input.h>
-#include <sys/timeb.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include "Board.hpp"
 
+#if defined(__linux__)
+        #include <termios.h>
+        #include <fcntl.h>
+        #include <linux/input.h>
+        #include <sys/timeb.h>
+        #include <sys/types.h>
+        #include <sys/stat.h>
+#elif defined(_WIN32)
+        #include <windows.h>
+#endif
+
+#include "Board.hpp"
 #include "KeyInput.hpp"
 
+#if defined(__linux__)
+        #if ! defined(KB_DEVICE)
+                #error Please specify keyboard device path in Makefile
+	#endif
+#elif defined(_WIN32)
+        #define KB_DEVICE
+#endif
+
+#if defined(__linux__)
 static struct termios t_old, t_new;
+#endif
+
 static const char splash[] =
 "                                                                         \n\
    _|_|_|            _|      _|            _|_|_|_|_|          _|_|_|    \n\
@@ -37,7 +52,7 @@ int main()
         show_splash();
 
         Board board = Board(20, 10);
-        Input input = Input("/dev/input/by-path/platform-80860F41:00-event-kbd");
+        Input input = Input(KB_DEVICE);
 
         echo_off();
         ftime(&start);
@@ -131,10 +146,12 @@ void show_splash(void)
                 {
                 case ' ':
                 case '\n':
-                        std::cout << "\033[0m" << splash[i];
+                        ::set_console_color(YELLOW);
+                        std::cout << splash[i];
                         break;
                 default:
-                        std::cout << "\033[1;34m" << splash[i];
+                        ::set_console_color(BLUE);
+                        std::cout << splash[i];
                         break;
                 }
         }
@@ -144,14 +161,28 @@ void show_splash(void)
 
 void echo_off(void)
 {
+#if defined(__linux__)
         tcgetattr(STDIN_FILENO, &t_old);
 	memcpy(&t_new, &t_old, sizeof(struct termios));
 	t_new.c_lflag &= static_cast<unsigned>(~( ECHO | ICANON | ECHOE | ECHOK | ECHONL | ECHOPRT | ECHOKE | ICRNL));
 	tcsetattr(STDIN_FILENO, TCSANOW, &t_new);
+#elif defined(_WIN32)
+        DWORD mode = 0;
+        HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE); 
+        GetConsoleMode(hStdin, &mode);
+        SetConsoleMode(hStdin, mode & (~ENABLE_ECHO_INPUT));
+#endif
 }
 
 void echo_on(void)
 {
+#if defined(__linux__)
         tcsetattr(STDIN_FILENO, TCSANOW, &t_old);
+#elif defined(_WIN32)
+        DWORD mode = 0;
+        HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE); 
+        GetConsoleMode(hStdin, &mode);
+        SetConsoleMode(hStdin, mode & ENABLE_ECHO_INPUT);
+#endif
 }
 

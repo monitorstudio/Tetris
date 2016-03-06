@@ -5,15 +5,31 @@
 #include <deque>
 #include <map>
 
-enum KeyState { RELEASED, PRESSED,
-                COLD1, COLD2, COLD3, COLD4, COLD5, COLD6, COLD7, COLD8, COLD9, COLD10,
-                CONTINUS };
+#if defined(_WIN32)
+        #define KEY_UP          VK_UP
+        #define KEY_DOWN        VK_DOWN
+        #define KEY_LEFT        VK_LEFT
+        #define KEY_RIGHT       VK_RIGHT
+        #define KEY_LEFTSHIFT   VK_LSHIFT
+        #define KEY_RIGHTSHIFT  VK_RSHIFT
+        #define KEY_LEFTCTRL    VK_LCONTROL
+        #define KEY_RIGHTCTRL   VK_RCONTROL
+        #define KEY_SPACE       VK_SPACE
+        #define KEY_Q           static_cast<int>('q')
+#endif
+
+enum KeyState
+{
+        RELEASED, PRESSED,
+        COLD1, COLD2, COLD3, COLD4, COLD5, COLD6, COLD7, COLD8, COLD9, COLD10,
+        CONTINUS
+};
 
 class Input
 {
 public:
-        Input(void);    // not impled
-        Input(std::string kbd_path);
+        Input(void);                    // For Windows
+        Input(std::string kbd_path);    // For Linux
 
         void _update(void);
         std::deque<int> get_pressed_keys(void);

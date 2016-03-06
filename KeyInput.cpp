@@ -2,8 +2,13 @@
 #include <cstring>
 #include <cassert>
 #include <cstddef>
-#include <fcntl.h>
-#include <linux/input.h>
+
+#if defined(__linux__)
+        #include <fcntl.h>
+        #include <linux/input.h>
+#elif defined(_WIN32)
+        #include <windows.h>
+#endif
 
 #include "KeyInput.hpp"
 
@@ -16,6 +21,13 @@ static int keys[] =
         KEY_SPACE,      KEY_Q
 };
 
+#if defined(_WIN32)
+Input::Input(void)
+{
+        for(std::size_t i = 0; i < sizeof(keys) / sizeof(int); i++)
+                _status_table[keys[i]] = RELEASED;
+}
+#elif defined(__linux__)
 Input::Input(std::string kbd_path)
 {
         assert((_kbd = open(kbd_path.c_str(), O_RDONLY)) != -1);
@@ -23,6 +35,7 @@ Input::Input(std::string kbd_path)
         for(std::size_t i = 0; i < sizeof(keys) / sizeof(int); i++)
                 _status_table[keys[i]] = RELEASED;
 }
+#endif
 
 std::deque<int> Input::get_pressed_keys(void)
 {
@@ -121,11 +134,19 @@ void Input::_press(const std::deque<int> &pressed)
 
 bool Input::_key_pressed(int key)
 {
+#if defined(__linux__)
         char key_b[(KEY_MAX + 7) / 8];
 
 	memset(key_b, 0, sizeof(key_b));
 	ioctl(_kbd, EVIOCGKEY(sizeof(key_b)), key_b);
 
 	return !!(key_b[key / 8] & (1 << (key % 8)));
+#elif defined(_WIN32)
+        BYTE state[256];
+
+        GetKeyboardState(state);
+
+        return (bool)((unsigned short)GetKeyState(key) >> ((sizeof(SHORT) * 8) - 1));
+#endif
 }
 

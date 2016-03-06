@@ -1,21 +1,24 @@
 CXX=clang++
 CXXFLAGS=-std=c++14 -Wall -pedantic -Ofast -g3 -static
 STRIP=strip
+KB_DEVICE=\"/dev/input/by-path/platform-80860F41:00-event-kbd\"
 
 all:
-	make release -j8
+	echo 'Please specify opertaing system type -- "make linux" OR "make windows"'
 
-release: debug
-	cp Tetris.dbg Tetris
-	$(STRIP) Tetris
+windows: main_win32 Board Tetris KeyInput Block
+	$(CXX) $(CXXFLAGS) -o Tetris.exe main.o Board.o Tetris.o KeyInput.o Block.o
 
-debug: main Board Tetris KeyInput Block Logger
-	$(CXX) $(CXXFLAGS) -o Tetris.dbg main.o Board.o Tetris.o KeyInput.o Block.o Logger.o
+linux: main_linux Board Tetris KeyInput Block
+	$(CXX) $(CXXFLAGS) -o Tetris main.o Board.o Tetris.o KeyInput.o Block.o
 
-main: Board.hpp Array.hpp Block.hpp Logger.hpp main.cpp
+main_win32: Board.hpp Array.hpp Block.hpp main.cpp
 	$(CXX) $(CXXFLAGS) -c main.cpp
 
-Board: Board.hpp Tetris.hpp Block.hpp Array.hpp Logger.hpp Board.cpp
+main_linux: Board.hpp Array.hpp Block.hpp main.cpp
+	$(CXX) $(CXXFLAGS) -c main.cpp -DKB_DEVICE=$(KB_DEVICE)
+
+Board: Board.hpp Tetris.hpp Block.hpp Array.hpp Board.cpp
 	$(CXX) $(CXXFLAGS) -c Board.cpp
 
 Tetris: Tetris.hpp Tetris.cpp
@@ -24,12 +27,9 @@ Tetris: Tetris.hpp Tetris.cpp
 KeyInput: KeyInput.hpp KeyInput.cpp
 	$(CXX) $(CXXFLAGS) -c KeyInput.cpp
 
-Block: Block.hpp Array.hpp Logger.hpp Block.cpp
+Block: Block.hpp Array.hpp Block.cpp
 	$(CXX) $(CXXFLAGS) -c Block.cpp
 
-Logger: Logger.hpp Logger.cpp
-	$(CXX) $(CXXFLAGS) -c Logger.cpp
-
 .PHONY clean:
-	rm Tetris.dbg Tetris *.o
+	rm Tetris Tetris.exe *.o
 
