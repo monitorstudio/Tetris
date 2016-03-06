@@ -5,7 +5,7 @@ KB_DEVICE=
 #\"/dev/input/by-path/platform-80860F41:00-event-kbd\"
 
 all:
-	echo 'Please specify opertaing system type -- "make linux" OR "make windows"'
+	echo 'Please specify your opertaing system type -- "make linux" OR "make windows"'
 
 windows: main_win32 Board Tetris KeyInput Block
 	$(CXX) $(CXXFLAGS) -o Tetris.exe main.o Board.o Tetris.o KeyInput.o Block.o

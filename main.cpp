@@ -20,7 +20,8 @@
 #include "KeyInput.hpp"
 
 #if defined(__linux__)
-        #if ! defined(KB_DEVICE)
+        #if (KB_DEVICE == "")
+        #else
                 #error Please specify keyboard device path in Makefile
 	#endif
 #elif defined(_WIN32)
