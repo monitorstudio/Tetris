@@ -47,7 +47,7 @@ A Command Line Based Tetris
 	<th>Screenshots</th>
 </tr>
 <tr>
-	<td><img src=https://raw.githubusercontent.com/monitorstudio/Tetris/master/Screenshot.from.2016-03-04.21-51-08.png></img></td>
+	<td><img src=https://raw.githubusercontent.com/monitorstudio/Tetris/master/Screenshot_linux.png></img></td>
 </tr>
 <tr>
 	<td><img src=https://raw.githubusercontent.com/monitorstudio/Tetris/master/Tetris.png></img></td>
