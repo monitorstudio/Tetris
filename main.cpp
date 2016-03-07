@@ -99,7 +99,7 @@ int main()
                 }
 
                 ftime(&repeat_end);
-                if((repeat_end.time * 1000 + repeat_end.millitm) - (repeat_start.time * 1000 + repeat_start.millitm) >= 60)
+                if((repeat_end.time * 1000 + repeat_end.millitm) - (repeat_start.time * 1000 + repeat_start.millitm) >= 30)
                 {
                         for(repeated_keys = input.get_repeated_keys(), i = 0, size = repeated_keys.size(); i < size; i++)
                         {
@@ -129,7 +129,7 @@ int main()
                         ftime(&start);
                 }
 
-                usleep(1000);
+                usleep(20000);
         }
 }
 

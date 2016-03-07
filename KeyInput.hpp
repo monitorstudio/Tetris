@@ -28,7 +28,7 @@ enum KeyState
 class Input
 {
 public:
-#if defined(__WIN32)
+#if defined(_WIN32)
         Input(void);                    // For Windows
 #elif defined(__linux__)
         Input(std::string kbd_path);    // For Linux

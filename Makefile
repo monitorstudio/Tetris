@@ -1,4 +1,4 @@
-CXX=clang++
+CXX=g++
 CXXFLAGS=-std=c++11 -Wall -Wextra -pedantic -Ofast -g3 -static
 STRIP=strip
 KB_DEVICE=
@@ -20,6 +20,7 @@ all:
 
 windows: main_win32 Board Tetris KeyInput Block
 	$(CXX) $(CXXFLAGS) -o Tetris.exe main.o Board.o Tetris.o KeyInput.o Block.o
+	$(STRIP) Tetris.exe
 
 linux: main_linux Board Tetris KeyInput Block
 	$(CXX) $(CXXFLAGS) -o Tetris main.o Board.o Tetris.o KeyInput.o Block.o

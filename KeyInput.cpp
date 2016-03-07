@@ -25,7 +25,7 @@ static int keys[] =
 };
 
 Input::Input(void)
-        : _cold_during(70)
+        : _cold_during(5)
 {
         for(std::size_t i = 0; i < sizeof(keys) / sizeof(int); i++)
         {
