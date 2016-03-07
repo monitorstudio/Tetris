@@ -275,7 +275,7 @@ namespace {
 
                 block.buttom().for_each([&] (Array<int> &coord) mutable -> void
                 {
-                        if(coord[0] + block.y() == table.size() - 1)
+                        if(static_cast<std::size_t>(coord[0] + block.y()) == table.size() - 1)
                                 height = 0;
 
                         for(i = coord[0] + block.y() + 1; i < table.size(); i++)
@@ -421,7 +421,7 @@ void Board::rotate_block(bool dir)
         {
                 for(size_t i = 0; i < 4; i++)
                 {
-                        if(_block.y() + _block.blocks()[i][0] < 0 || _block.y() + _block.blocks()[i][0] >= _table.size() || _block.x() + _block.blocks()[i][1] < 0 || _block.x() + _block.blocks()[i][1] >= _table[0].size())
+                        if(_block.y() + _block.blocks()[i][0] < 0 || static_cast<std::size_t>(_block.y() + _block.blocks()[i][0]) >= _table.size() || _block.x() + _block.blocks()[i][1] < 0 || static_cast<std::size_t>(_block.x() + _block.blocks()[i][1]) >= _table[0].size())
                         {
                                 return true;
                         }
@@ -560,7 +560,7 @@ void Board::move_block_down(void)
 
                 for (size_t i = 0, size = _buttom.size(); i < size; i++)
                 {
-                        if (y + _buttom[i][0] + 1 < _table.size())
+                        if (static_cast<std::size_t>(y + _buttom[i][0] + 1) < _table.size())
                         {
                                 state = _table[y + _buttom[i][0] + 1][x + _buttom[i][1]];
 
@@ -636,7 +636,7 @@ int Board::move_block_right(void)
 
         for(size_t i = 0, size = _right.size(); i < size; i++)
         {
-                if(x + _right[i][1] + 1 < _table[0].size())
+                if(static_cast<std::size_t>(x + _right[i][1] + 1) < _table[0].size())
                 {
                         state = _table[y + _right[i][0]][x + _right[i][1] + 1];
 
