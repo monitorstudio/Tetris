@@ -2,7 +2,7 @@ CXX=clang++
 CXXFLAGS=-std=c++11 -Wall -Wextra -pedantic -Ofast -g3 -static
 STRIP=strip
 KB_DEVICE=
-/dev/input/by-id/usb-0566_USB_Keyboard-event-if00
+#/dev/input/by-id/usb-0566_USB_Keyboard-event-if00
 #/dev/input/by-path/platform-80860F41:00-event-kbd
 
 ifneq ($(OS), Windows_NT)

@@ -128,7 +128,7 @@ int main()
                         ftime(&start);
                 }
 
-                usleep(20000);
+                usleep(15000);
         }
 }
 
