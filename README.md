@@ -50,6 +50,6 @@ A Command Line Based Tetris
 	<td><img src=https://raw.githubusercontent.com/monitorstudio/Tetris/master/Screenshot_linux.png></img></td>
 </tr>
 <tr>
-	<td><img src=https://raw.githubusercontent.com/monitorstudio/Tetris/master/Tetris.png></img></td>
+	<td><img src=https://raw.githubusercontent.com/monitorstudio/Tetris/master/Screenshot_windows.png></img></td>
 </tr>
 </table>
