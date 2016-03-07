@@ -122,24 +122,24 @@ inline void clear(void)
 }
 
 // FIXME clear_line NOT work
-inline void clear_line(void)
-{
-#if defined(__linux__)
-        std::cout << DEFAULT << "\033[K";
-        std::fflush(stdout);
-#elif defined(_WIN32)
-#endif
-}
+// inline void clear_line(void)
+// {
+// #if defined(__linux__)
+//         std::cout << DEFAULT << "\033[K";
+//         std::fflush(stdout);
+// #elif defined(_WIN32)
+// #endif
+// }
 
 // FIXME clear_line NOT work
-inline void clear_line(std::size_t y)
-{
-#if defined(__linux__)
-        goto_yx(y, 0);
-        clear_line();
-#elif defined(_WIN32)
-#endif
-}
+// inline void clear_line(std::size_t y)
+// {
+// #if defined(__linux__)
+//         goto_yx(y, 0);
+//         clear_line();
+// #elif defined(_WIN32)
+// #endif
+// }
 
 inline void print_cell(color_t color)
 {

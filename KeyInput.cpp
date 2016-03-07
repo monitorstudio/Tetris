@@ -35,6 +35,11 @@ Input::Input(std::string kbd_path)
         for(std::size_t i = 0; i < sizeof(keys) / sizeof(int); i++)
                 _status_table[keys[i]] = RELEASED;
 }
+
+Input::~Input(void)
+{
+	close(_kbd);
+}
 #endif
 
 std::deque<int> Input::get_pressed_keys(void)

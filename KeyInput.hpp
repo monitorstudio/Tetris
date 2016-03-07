@@ -28,8 +28,12 @@ enum KeyState
 class Input
 {
 public:
+#if defined(__WIN32)
         Input(void);                    // For Windows
+#elif defined(__linux__)
         Input(std::string kbd_path);    // For Linux
+		~Input(void);
+#endif
 
         void _update(void);
         std::deque<int> get_pressed_keys(void);
@@ -41,7 +45,9 @@ private:
         void _press(const std::deque<int> &pressed);
         bool _key_pressed(int key);
 
+#if defined(__linux__)
         int _kbd;
+#endif
         std::map<int, KeyState> _status_table;
 };
 

@@ -16,6 +16,8 @@ namespace {
                 case BLK_T:     return 'T';
                 case BLK_E:     return 'E';
                 }
+
+                return 'E';
         }
 
         int blockId(block_t type)
@@ -31,6 +33,8 @@ namespace {
                 case BLK_T:     return 6;
                 case BLK_E:     return 7;
                 }
+
+                return 7;
         }
 
 }
