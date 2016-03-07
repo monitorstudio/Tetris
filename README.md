@@ -39,7 +39,7 @@ A Command Line Based Tetris
 	<td>T-Spin Triple is Supported</td?
 </tr>
 <tr>
-	<td>I-Spin, L-Spin and J-Spin is also Supported</td>
+	<td>I-Spin, L-Spin, J-Spin, S-Spin and Z-Spin is also Supported</td>
 </tr>
 </table>
 <table>
