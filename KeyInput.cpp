@@ -2,10 +2,13 @@
 #include <cstring>
 #include <cassert>
 #include <cstddef>
+#include <unistd.h>
 
 #if defined(__linux__)
         #include <fcntl.h>
         #include <linux/input.h>
+        #include <sys/types.h>
+        #include <sys/stat.h>
 #elif defined(_WIN32)
         #include <windows.h>
 #endif
@@ -21,35 +24,41 @@ static int keys[] =
         KEY_SPACE,      KEY_Q
 };
 
-#if defined(_WIN32)
 Input::Input(void)
+        : _cold_during(70)
 {
         for(std::size_t i = 0; i < sizeof(keys) / sizeof(int); i++)
+        {
                 _status_table[keys[i]] = RELEASED;
+                _cold_count[keys[i]] = 0;
+        }
 }
-#elif defined(__linux__)
+#if defined(__linux__)
 Input::Input(std::string kbd_path)
+        : Input()
 {
-        assert((_kbd = open(kbd_path.c_str(), O_RDONLY)) != -1);
-
-        for(std::size_t i = 0; i < sizeof(keys) / sizeof(int); i++)
-                _status_table[keys[i]] = RELEASED;
+        assert((_kbd = ::open(kbd_path.c_str(), O_RDONLY)) != -1);
 }
 
 Input::~Input(void)
 {
-	close(_kbd);
+        ::close(_kbd);
 }
 #endif
+
+void Input::set_cold_during(std::size_t during)
+{
+        _cold_during = during;
+}
 
 std::deque<int> Input::get_pressed_keys(void)
 {
         return _get_keys(PRESSED);
 }
 
-std::deque<int> Input::get_continus_keys(void)
+std::deque<int> Input::get_repeated_keys(void)
 {
-        return _get_keys(CONTINUS);
+        return _get_keys(REPEATED);
 }
 
 std::deque<int> Input::_get_keys(KeyState state)
@@ -99,39 +108,20 @@ void Input::_press(const std::deque<int> &pressed)
                         _status_table[pressed[i]] = PRESSED;
                         break;
                 case PRESSED:
-                        _status_table[pressed[i]] = COLD1;
+                        _status_table[pressed[i]] = COLD;
                         break;
-                case COLD1:
-                        _status_table[pressed[i]] = COLD2;
+                case COLD:
+                        if(_cold_count[pressed[i]] != _cold_during)
+                        {
+                                _cold_count[pressed[i]] += 1;
+                        }
+                        else
+                        {
+                                _status_table[pressed[i]] = REPEATED;
+                                _cold_count[pressed[i]] = 0;
+                        }
                         break;
-                case COLD2:
-                        _status_table[pressed[i]] = COLD3;
-                        break;
-                case COLD3:
-                        _status_table[pressed[i]] = COLD4;
-                        break;
-                case COLD4:
-                        _status_table[pressed[i]] = COLD5;
-                        break;
-                case COLD5:
-                        _status_table[pressed[i]] = COLD6;
-                        break;
-                case COLD6:
-                        _status_table[pressed[i]] = COLD7;
-                        break;
-                case COLD7:
-                        _status_table[pressed[i]] = COLD8;
-                        break;
-                case COLD8:
-                        _status_table[pressed[i]] = COLD9;
-                        break;
-                case COLD9:
-                        _status_table[pressed[i]] = COLD10;
-                        break;
-                case COLD10:
-                        _status_table[pressed[i]] = CONTINUS;
-                        break;
-                case CONTINUS:
+                case REPEATED:
                         break;
                 }
         }
@@ -151,8 +141,9 @@ bool Input::_key_pressed(int key)
 
         GetKeyboardState(state);
 
-        // GetKeyState returns SHORT if key is being pressed, the MSB is HIGH
-        return static_cast<signed short>(GetKeyState(key)) < 0;
+        // GetKeyState returns SHORT
+        // If key is being pressed, the MSB is HIGH
+        return (static_cast<signed short>(GetKeyState(key)) < 0);
 #endif
 }
 

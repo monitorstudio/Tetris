@@ -1,4 +1,5 @@
 #include <cstddef>
+
 #include "Block.hpp"
 
 namespace {
@@ -172,9 +173,9 @@ void Block::rotate(void)
         }
 }
 
-void Block::move(int my, int mx)
+void Block::move(int offset_y, int offset_x)
 {
-        _y += my, _x += mx;
+        _y += offset_y, _x += offset_x;
 }
 
 void Block::_find_brim(void)

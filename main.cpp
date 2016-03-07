@@ -43,24 +43,24 @@ void echo_on(void);
 
 int main()
 {
-        struct timeb start, end;
+        struct timeb start, end, repeat_start, repeat_end;
 
+        Input input = Input(KB_DEVICE);
         show_splash();
 
         Board board = Board(20, 10);
-        Input input = Input(KB_DEVICE);
 
         echo_off();
         ftime(&start);
+        ftime(&repeat_start);
 
         std::size_t i, size;
         std::deque<int> pressed_keys;
-        std::deque<int> continus_keys;
+        std::deque<int> repeated_keys;
 
         for(; ; )
         {
                 input._update();
-                ftime(&end);
 
                 for(pressed_keys = input.get_pressed_keys(), i = 0, size = pressed_keys.size(); i < size; i++)
                 {
@@ -98,11 +98,12 @@ int main()
                         }
                 }
 
-                if(end.millitm - start.millitm >= 40)
+                ftime(&repeat_end);
+                if((repeat_end.time * 1000 + repeat_end.millitm) - (repeat_start.time * 1000 + repeat_start.millitm) >= 60)
                 {
-                        for(continus_keys = input.get_continus_keys(), i = 0, size = continus_keys.size(); i < size; i++)
+                        for(repeated_keys = input.get_repeated_keys(), i = 0, size = repeated_keys.size(); i < size; i++)
                         {
-                                switch(continus_keys[i])
+                                switch(repeated_keys[i])
                                 {
                                 case KEY_DOWN:
                                         board.move_block_down();
@@ -118,7 +119,7 @@ int main()
                                 }
                         }
 
-                        ftime(&start);
+                        ftime(&repeat_start);
                 }
 
                 ftime(&end);
@@ -128,7 +129,7 @@ int main()
                         ftime(&start);
                 }
 
-                usleep(15000);
+                usleep(1000);
         }
 }
 

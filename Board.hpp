@@ -31,7 +31,7 @@ private:
         int _y, _x;
         int _pos;
         block_t _nextBlock(void);
-        std::deque<block_t> _buffer;
+        std::deque<block_t> _block_queue;
 };
 
 typedef enum

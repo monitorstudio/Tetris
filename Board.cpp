@@ -162,22 +162,22 @@ BlockGenerator::BlockGenerator(int y, int x)
 
 block_t BlockGenerator::getBlock(void)
 {
-        while(_buffer.size() <= 5)
-                _buffer.push_back(_nextBlock());
+        while(_block_queue.size() <= 5)
+                _block_queue.push_back(_nextBlock());
 
-        block_t block = _buffer.front();
-        _buffer.pop_front();
+        block_t block = _block_queue.front();
+        _block_queue.pop_front();
 
-        box(LARGE, _buffer[0], _y + 2, _x * 2 + 14);
+        box(LARGE, _block_queue[0], _y + 2, _x * 2 + 14);
         for(int i = 1; i < 4; i++)
-                box(SMALL, _buffer[i], _y + 3 + i * 4, _x * 2 + 14);
+                box(SMALL, _block_queue[i], _y + 3 + i * 4, _x * 2 + 14);
 
         return block;
 }
 
 void BlockGenerator::reset(void)
 {
-        _buffer.clear();
+        _block_queue.clear();
         _pos = 7;
 }
 

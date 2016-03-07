@@ -1,6 +1,7 @@
 #ifndef KEYINPUT_HPP_
 #define KEYINPUT_HPP_
 
+#include <cstddef>
 #include <string>
 #include <deque>
 #include <map>
@@ -21,8 +22,7 @@
 enum KeyState
 {
         RELEASED, PRESSED,
-        COLD1, COLD2, COLD3, COLD4, COLD5, COLD6, COLD7, COLD8, COLD9, COLD10,
-        CONTINUS
+        COLD, REPEATED
 };
 
 class Input
@@ -36,9 +36,13 @@ public:
 #endif
 
         void _update(void);
+        void set_cold_during(std::size_t during);
         std::deque<int> get_pressed_keys(void);
-        std::deque<int> get_continus_keys(void);
+        std::deque<int> get_repeated_keys(void);
 private:
+#if defined(__linux__)
+        Input(void);
+#endif
         std::deque<int> _get_keys(KeyState state);
         void _read_key_state(std::deque<int> &pressed, std::deque<int> &released);
         void _release(const std::deque<int> &released);
@@ -48,7 +52,9 @@ private:
 #if defined(__linux__)
         int _kbd;
 #endif
-        std::map<int, KeyState> _status_table;
+        std::map<int, KeyState>         _status_table;
+        std::map<int, std::size_t>      _cold_count;
+        std::size_t                     _cold_during;
 };
 
 #endif  // KEYINPUT_HPP_
