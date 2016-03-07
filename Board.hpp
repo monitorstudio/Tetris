@@ -13,7 +13,7 @@ class BlockHolder
 {
 public:
         BlockHolder(void);
-        void hold(block_t &);
+        void hold(block_t &type);
         void clear(void);
         void reset(void);
 private:
@@ -24,7 +24,7 @@ class BlockGenerator
 {
 public:
         BlockGenerator(void);
-        BlockGenerator(int, int);
+        BlockGenerator(int y, int x);
         block_t getBlock(void);
         void reset(void);
 private:
@@ -46,13 +46,13 @@ typedef enum
 class Board
 {
 public:
-        Board(size_t, size_t);
+        Board(size_t y, size_t x);
         ~Board(void);
 
         void show(void);
         void clear(void);
         void auto_play(void);
-        void rotate_block(bool);
+        void rotate_block(bool dir);
         void drop_block(void);
         void hold_block(void);
         void move_block_down(void);

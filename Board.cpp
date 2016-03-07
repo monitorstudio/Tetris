@@ -363,6 +363,7 @@ namespace {
 }
 
 Board::Board(size_t column, size_t row)
+        : _block(Block(BLK_E))
 {
         ::hide_cursor();
         ::clear();

@@ -39,11 +39,6 @@ namespace {
 
 }
 
-Block::Block(void)
-{
-        // Do Nothing
-}
-
 Block::Block(block_t type)
         : _type(type), _rotation(0)
 {
@@ -152,10 +147,9 @@ Array<Array<int> > &Block::right(void)
 
 void Block::rotate(void)
 {
-        bool dir = true;        // Counter-Clockwise Rotate Is Not Support Yet
-
         if(_type != BLK_O)        // No Need To Rotate Block O
         {
+                // This do the clockwise spin magic
                 _blocks.for_each([&] (Array<int> &array) mutable -> void
                 {
                         int i = array[0];
@@ -170,11 +164,11 @@ void Block::rotate(void)
         // Update Rotation Status
         switch(_rotation)
         {
-        case 0:         _rotation = (dir == true) ? 1 : 3;      break;
-        case 1:         _rotation = (dir == true) ? 2 : 0;      break;
-        case 2:         _rotation = (dir == true) ? 3 : 1;      break;
-        case 3:         _rotation = (dir == true) ? 0 : 2;      break;
-        default:                                                break;
+        case 0:     _rotation = 1;  break;
+        case 1:     _rotation = 2;  break;
+        case 2:     _rotation = 3;  break;
+        case 3:     _rotation = 0;  break;
+        default:                    break;
         }
 }
 
@@ -235,21 +229,21 @@ void Block::_move_center(void)        // Correct Center On Each Rotation Status
         switch(blockId(_type) + _rotation * 4)
         {
         // BLK_I
-        case 0 +  0:    my = -1, mx =  0;       break;
-        case 0 +  4:    my =  0, mx = -1;       break;
-        case 0 +  8:    my =  1, mx =  0;       break;
-        case 0 + 12:    my =  0, mx =  1;       break;
+        case 0 +  0:    my = -1, mx =  0;    break;
+        case 0 +  4:    my =  0, mx = -1;    break;
+        case 0 +  8:    my =  1, mx =  0;    break;
+        case 0 + 12:    my =  0, mx =  1;    break;
         // BLK_S
-        case 2 +  0:    my =  0, mx =  1;       break;
-        case 2 +  4:    my = -1, mx =  0;       break;
-        case 2 +  8:    my =  0, mx = -1;       break;
-        case 2 + 12:    my =  1, mx =  0;       break;
+        case 2 +  0:    my =  0, mx =  1;    break;
+        case 2 +  4:    my = -1, mx =  0;    break;
+        case 2 +  8:    my =  0, mx = -1;    break;
+        case 2 + 12:    my =  1, mx =  0;    break;
         // BLK_Z
-        case 3 +  0:    my =  0, mx = -1;       break;
-        case 3 +  4:    my =  1, mx =  0;       break;
-        case 3 +  8:    my =  0, mx =  1;       break;
-        case 3 + 12:    my = -1, mx =  0;       break;
-        default:        my =  0, mx =  0;       break;
+        case 3 +  0:    my =  0, mx = -1;    break;
+        case 3 +  4:    my =  1, mx =  0;    break;
+        case 3 +  8:    my =  0, mx =  1;    break;
+        case 3 + 12:    my = -1, mx =  0;    break;
+        default:        my =  0, mx =  0;    break;
         }
 
         switch (_type)

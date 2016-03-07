@@ -25,8 +25,8 @@ public:
         Array<Array<int> > &left(void);
         Array<Array<int> > &right(void);
 
-        void rotate(void);	// Conter
-        void move(int, int);	// Move y, x
+        void rotate(void);          // Conter
+        void move(int y, int x);    // Move y, x
 private:
         void _find_brim(void);
         void _move_center(void);

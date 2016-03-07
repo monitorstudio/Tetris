@@ -142,16 +142,17 @@ bool Input::_key_pressed(int key)
 #if defined(__linux__)
         char key_b[(KEY_MAX + 7) / 8];
 
-	memset(key_b, 0, sizeof(key_b));
-	ioctl(_kbd, EVIOCGKEY(sizeof(key_b)), key_b);
+        memset(key_b, 0, sizeof(key_b));
+        ioctl(_kbd, EVIOCGKEY(sizeof(key_b)), key_b);
 
-	return !!(key_b[key / 8] & (1 << (key % 8)));
+        return !!(key_b[key / 8] & (1 << (key % 8)));
 #elif defined(_WIN32)
         BYTE state[256];
 
         GetKeyboardState(state);
 
-        return (bool)((unsigned short)GetKeyState(key) >> ((sizeof(SHORT) * 8) - 1));
+        // GetKeyState returns SHORT if key is being pressed, the MSB is HIGH
+        return static_cast<signed short>(GetKeyState(key)) < 0;
 #endif
 }
 
