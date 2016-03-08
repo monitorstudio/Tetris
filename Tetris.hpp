@@ -13,7 +13,7 @@
 #if defined(__linux__)
         typedef const char * color_t;
         #define	WHITE   "\033[1;37;47m"
-        #define BGWHITE "\033[0;37;47m"
+        #define SILVER  "\033[0;37;47m"
         #define	CYAN    "\033[0;36;46m"
         #define	YELLOW  "\033[1;33;43m"
         #define	GREEN   "\033[0;32;42m"
@@ -26,7 +26,7 @@
 #elif defined(_WIN32)
         typedef int color_t;
         #define	WHITE   255
-        #define BGWHITE 392
+        #define SILVER  392
         #define	CYAN    187
         #define	YELLOW  238
         #define	GREEN   426
